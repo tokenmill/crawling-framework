@@ -1,0 +1,14 @@
+#Discard URLs, longer than 512 chars
+-.{512,}
+
+#Discard urls which are actually links to other urls
+-^https?://.*https?:.*
+
+#Discard urls containing illegal characters: space, %20 or #
+-.*(:?%20| |#|\@).*
+
+#Discard media or binary files
+-(?i).*\.(exe|dmg|csv|mp3|mp4|m4a|avi|mov|swf|wmv|dat|mpg|mpg4|flm|mtv|video|divx|mpeg4|film|xwmv|exo|pdf|jpg|jpeg|png|bmp|gif|doc|docx|xls|xlsx|ppt|pptx|rss)$
+
+#Allow everything else
++.

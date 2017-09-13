@@ -1,0 +1,32 @@
+{
+  "@context": "http:\/\/schema.org",
+  "@type": "Article",
+  "url": "http:\/\/www.bbc.com\/news\/world-latin-america-41091745",
+  "publisher": {
+    "@type": "Organization",
+    "name": "BBC News",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http:\/\/www.bbc.co.uk\/news\/special\/2015\/newsspec_10857\/bbc_news_logo.png?cb=1"
+    }
+  },
+  "datePublished": "2017-08-30T10:32:11+01:00",
+  "dateModified": "2017-08-30T10:32:11+01:00",
+  "headline": "Venezuela: New assembly approves treason trials for opposition",
+  "image": {
+    "@type": "ImageObject",
+    "width": 720,
+    "height": 405,
+    "url": "https:\/\/ichef-1.bbci.co.uk\/news\/720\/cpsprodpb\/11EF3\/production\/_97595437_mediaitem97595433.jpg"
+  },
+  "thumbnailUrl": "https:\/\/ichef.bbci.co.uk\/news\/208\/cpsprodpb\/11EF3\/production\/_97595437_mediaitem97595433.jpg",
+  "author": {
+    "@type": "Organization",
+    "name": "BBC News",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http:\/\/www.bbc.co.uk\/news\/special\/2015\/newsspec_10857\/bbc_news_logo.png?cb=1"
+    }
+  },
+  "mainEntityOfPage": "http:\/\/www.bbc.com\/news\/world-latin-america-41091745"
+}

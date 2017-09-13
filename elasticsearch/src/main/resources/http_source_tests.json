@@ -1,0 +1,53 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "http_source_test": {
+      "_source": {
+        "enabled": true
+      },
+      "properties": {
+        "updated": {
+          "type": "date",
+          "format": "date_optional_time",
+          "index": false
+        },
+        "source_url": {
+          "type": "keyword",
+          "index": false
+        },
+        "url": {
+          "type": "keyword",
+          "index": false
+        },
+        "url_accepted": {
+          "type": "boolean",
+          "index": false,
+          "doc_values": false
+        },
+        "html": {
+          "type": "keyword",
+          "index": false,
+          "doc_values": false
+        },
+        "title": {
+          "type": "keyword",
+          "index": false,
+          "doc_values": false
+        },
+        "text": {
+          "type": "keyword",
+          "index": false,
+          "doc_values": false
+        },
+        "date": {
+          "type": "keyword",
+          "index": false,
+          "doc_values": false
+        }
+      }
+    }
+  }
+}

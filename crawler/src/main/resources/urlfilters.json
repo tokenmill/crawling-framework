@@ -1,0 +1,11 @@
+{
+  "com.digitalpebble.stormcrawler.filtering.URLFilters": [
+    {
+      "class": "com.digitalpebble.stormcrawler.filtering.regex.RegexURLFilter",
+      "name": "RegexURLFilter",
+      "params": {
+        "regexFilterFile": "urlfilters.txt"
+      }
+    }
+  ]
+}
