@@ -22,7 +22,7 @@ public class EsHttpUrlOperationsTest {
     private static final boolean ES_CLEAN_DATA_DIR = true;
     private static final String INDEX_ALIAS = "urls";
     private static final String DOC_TYPE = "url";
-    private static final String INDEX_CONF_RESOURCE_FILE = "urls.json";
+    private static final String INDEX_CONF_RESOURCE_FILE = "indices/url.json";
 
     private ElasticsearchTestServer elasticsearchTestServer;
 

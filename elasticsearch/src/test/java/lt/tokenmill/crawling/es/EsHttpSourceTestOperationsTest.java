@@ -25,7 +25,7 @@ public class EsHttpSourceTestOperationsTest {
     private static final boolean ES_CLEAN_DATA_DIR = true;
     private static final String INDEX_ALIAS = "http_source_tests";
     private static final String DOC_TYPE = "http_source_test";
-    private static final String INDEX_CONF_RESOURCE_FILE = "http_source_tests.json";
+    private static final String INDEX_CONF_RESOURCE_FILE = "indices/http_source_test.json";
 
     private ElasticsearchTestServer elasticsearchTestServer;
 

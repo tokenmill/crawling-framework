@@ -11,32 +11,26 @@
       "properties": {
         "created": {
           "type": "date",
-          "index": "not_analyzed",
           "doc_values": true
         },
         "updated": {
           "type": "date",
-          "index": "not_analyzed",
           "doc_values": true
         },
         "published": {
-          "type": "string",
-          "index": "not_analyzed",
+          "type": "keyword",
           "doc_values": true
         },
         "url": {
-          "type": "string",
-          "index": "not_analyzed",
+          "type": "keyword",
           "doc_values": true
         },
         "source": {
-          "type": "string",
-          "index": "not_analyzed",
+          "type": "keyword",
           "doc_values": true
         },
         "status": {
-          "type": "string",
-          "index": "not_analyzed",
+          "type": "keyword",
           "doc_values": true
         }
       }
