@@ -5,7 +5,7 @@
     <groupId>lt.tokenmill.crawling</groupId>
     <artifactId>crawling-framework</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <name>Crawling Framework</name>
     <description>Framework to simplify news crawling</description>
     <url>https://github.com/tokenmill/crawling-framework</url>
@@ -43,6 +43,17 @@
         <developerConnection>scm:git:ssh://github.com:tokenmill/crawling-framework.git</developerConnection>
         <url>https://github.com/tokenmill/crawling-framework/tree/master</url>
     </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <profiles>
         <profile>
