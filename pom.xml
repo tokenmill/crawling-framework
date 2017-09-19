@@ -6,7 +6,43 @@
     <artifactId>crawling-framework</artifactId>
     <packaging>pom</packaging>
     <version>0.2.0-SNAPSHOT</version>
-    <name>crawling-framework</name>
+    <name>Crawling Framework</name>
+    <description>Framework to simplify news crawling</description>
+    <url>https://github.com/tokenmill/crawling-framework</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Donatas Remeika</name>
+            <email>donatas.remeika@gmail.com</email>
+            <organization>TokenMill</organization>
+            <organizationUrl>http://www.tokenmill.lt</organizationUrl>
+        </developer>
+        <developer>
+            <name>Dainius Jocas</name>
+            <email>dainius.jocas@tokenmill.lt</email>
+            <organization>TokenMill</organization>
+            <organizationUrl>http://www.tokenmill.lt</organizationUrl>
+        </developer>
+        <developer>
+            <name>Žygimantas Medelis</name>
+            <email>zygimantas.medelis@gmail.com</email>
+            <organization>TokenMill</organization>
+            <organizationUrl>http://www.tokenmill.lt</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/tokenmill/crawling-framework.git</connection>
+        <developerConnection>scm:git:ssh://github.com:tokenmill/crawling-framework.git</developerConnection>
+        <url>https://github.com/tokenmill/crawling-framework/tree/master</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
