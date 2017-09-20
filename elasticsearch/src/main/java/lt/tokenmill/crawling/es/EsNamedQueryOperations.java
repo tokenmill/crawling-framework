@@ -31,7 +31,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
 
     private static final Logger LOG = LoggerFactory.getLogger(EsNamedQueryOperations.class);
 
-    private EsNamedQueryOperations(ElasticConnection connection, String index, String type) {
+    protected EsNamedQueryOperations(ElasticConnection connection, String index, String type) {
         super(connection, index, type);
         LOG.info("Created ES HTTP Source Tests Operations {}/{}", index, type);
     }

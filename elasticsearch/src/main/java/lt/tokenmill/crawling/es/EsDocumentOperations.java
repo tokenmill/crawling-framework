@@ -50,7 +50,7 @@ public class EsDocumentOperations extends BaseElasticOps {
             PUBLISHED_FIELD, DISCOVERED_FIELD, TITLE_FIELD, TEXT_FIELD,
             STATUS_FIELD, APP_IDS_FIELD, CATEGORIES_FIELD);
 
-    private EsDocumentOperations(ElasticConnection connection, String index, String type) {
+    protected EsDocumentOperations(ElasticConnection connection, String index, String type) {
         super(connection, index, type);
         LOG.info("Created ES Documents Operations {}/{}", index, type);
     }
@@ -196,40 +196,6 @@ public class EsDocumentOperations extends BaseElasticOps {
         }
     }
 
-
-    public List<HttpArticle> findByStatus(String status, int count) {
-        BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery(STATUS_FIELD, String.valueOf(status)));
-
-        SearchResponse response = getConnection().getClient()
-                .prepareSearch(getIndex())
-                .setTypes(getType())
-                .setSearchType(SearchType.DEFAULT)
-                .setPostFilter(filter)
-                .addSort(CREATED_FIELD, SortOrder.DESC)
-                .setSize(count)
-                .setFetchSource(true)
-                .setExplain(false)
-                .execute()
-                .actionGet();
-
-        SearchHits hits = response.getHits();
-        return Arrays.stream(hits.getHits())
-                .map(SearchHit::getSource)
-                .map(this::mapToHttpArticle)
-                .collect(Collectors.toList());
-    }
-
-    public void updateStatus(String url, String status) throws IOException {
-        UpdateRequestBuilder update = getConnection().getClient()
-                .prepareUpdate(getIndex(), getType(), url)
-                .setDoc(jsonBuilder()
-                        .startObject()
-                        .field(STATUS_FIELD, status)
-                        .endObject());
-        getConnection().getProcessor().add(update.request());
-    }
-
     private HighlightedSearchResult mapToHighlightedResult(SearchHit hit) {
         HttpArticle article = mapToHttpArticle(hit.getSource());
         List<String> highlights = Lists.newArrayList();
@@ -242,7 +208,7 @@ public class EsDocumentOperations extends BaseElasticOps {
     }
 
 
-    private HttpArticle mapToHttpArticle(Map<String, Object> source) {
+    protected HttpArticle mapToHttpArticle(Map<String, Object> source) {
         HttpArticle ha = new HttpArticle();
         ha.setUrl(Objects.toString(source.get("url"), null));
         ha.setSource(Objects.toString(source.get("source"), null));

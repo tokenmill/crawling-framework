@@ -32,7 +32,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
 
     private static final Logger LOG = LoggerFactory.getLogger(EsHttpSourceOperations.class);
 
-    private EsHttpSourceOperations(ElasticConnection connection, String index, String type) {
+    protected EsHttpSourceOperations(ElasticConnection connection, String index, String type) {
         super(connection, index, type);
         LOG.info("Created ES HTTP Sources Operations {}/{}", index, type);
     }

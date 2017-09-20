@@ -26,7 +26,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
 
     private static final Logger LOG = LoggerFactory.getLogger(EsHttpUrlOperations.class);
 
-    private EsHttpUrlOperations(ElasticConnection connection, String index, String type) {
+    protected EsHttpUrlOperations(ElasticConnection connection, String index, String type) {
         super(connection, index, type);
         LOG.info("Created ES URLs Operations {}/{}", index, type);
     }
