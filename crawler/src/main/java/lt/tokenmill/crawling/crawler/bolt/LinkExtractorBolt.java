@@ -9,6 +9,7 @@ import com.digitalpebble.stormcrawler.util.MetadataTransfer;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 import lt.tokenmill.crawling.crawler.CrawlerConstants;
+import lt.tokenmill.crawling.crawler.DefaultServiceProvider;
 import lt.tokenmill.crawling.crawler.ServiceProvider;
 import lt.tokenmill.crawling.crawler.utils.UrlFilterUtils;
 import lt.tokenmill.crawling.crawler.utils.UrlFiltersCache;
@@ -57,6 +58,9 @@ public class LinkExtractorBolt extends BaseRichBolt {
 
     private com.digitalpebble.stormcrawler.filtering.URLFilters defaultUrlFilters;
 
+    public LinkExtractorBolt(ServiceProvider serviceProvider) {
+        this.serviceProvider = serviceProvider;
+    }
 
     @Override
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -64,7 +68,6 @@ public class LinkExtractorBolt extends BaseRichBolt {
         this.eventCounter = context.registerMetric(this.getClass()
                 .getSimpleName(), new MultiCountMetric(), 10);
         this.metadataTransfer = MetadataTransfer.getInstance(conf);
-        this.serviceProvider = new ServiceProvider();
         this.esHttpSourcesOperations = this.serviceProvider.createEsHttpSourceOperations(conf);
         String filtersConfigFile = ConfUtils.getString(conf, CrawlerConstants.URL_FILTERS_FILE);
         this.defaultUrlFilters = UrlFilterUtils.load(conf, filtersConfigFile);

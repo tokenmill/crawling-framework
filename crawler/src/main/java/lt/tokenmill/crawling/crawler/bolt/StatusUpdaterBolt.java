@@ -3,8 +3,8 @@ package lt.tokenmill.crawling.crawler.bolt;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.AbstractStatusUpdaterBolt;
 import com.digitalpebble.stormcrawler.persistence.Status;
-import com.digitalpebble.stormcrawler.util.ConfUtils;
 import lt.tokenmill.crawling.crawler.CrawlerConstants;
+import lt.tokenmill.crawling.crawler.DefaultServiceProvider;
 import lt.tokenmill.crawling.crawler.ServiceProvider;
 import lt.tokenmill.crawling.crawler.utils.UrlFiltersCache;
 import lt.tokenmill.crawling.data.HttpSource;
@@ -28,6 +28,10 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
     private EsHttpUrlOperations esUrlsOperations;
     private EsHttpSourceOperations esHttpSourcesOperations;
     private ServiceProvider serviceProvider;
+
+    public StatusUpdaterBolt(ServiceProvider serviceProvider) {
+        this.serviceProvider = serviceProvider;
+    }
 
     @Override
     public void store(String url, Status status, Metadata metadata, Date nextFetch) throws Exception {
@@ -68,7 +72,6 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
     public void prepare(Map conf, TopologyContext context, OutputCollector outputCollector) {
         super.prepare(conf, context, outputCollector);
         this.eventCounter = context.registerMetric(this.getClass().getSimpleName(), new MultiCountMetric(), 10);
-        this.serviceProvider = new ServiceProvider();
         this.esUrlsOperations = this.serviceProvider.createEsHttpUrlOperations(conf);
         this.esHttpSourcesOperations = this.serviceProvider.createEsHttpSourceOperations(conf);
     }

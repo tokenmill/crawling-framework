@@ -17,6 +17,7 @@ import lt.tokenmill.crawling.parser.ArticleExtractor;
 import lt.tokenmill.crawling.parser.urls.UrlFilters;
 import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.shade.com.google.common.base.Strings;
+import org.apache.storm.shade.com.google.common.collect.Maps;
 import org.apache.storm.shade.org.apache.http.entity.ContentType;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -37,13 +38,17 @@ import static com.digitalpebble.stormcrawler.Constants.StatusStreamName;
 
 public class ArticleIndexerBolt extends BaseRichBolt {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArticleIndexerBolt.class);
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    private ServiceProvider serviceProvider;
-    private OutputCollector collector;
-    private MultiCountMetric eventCounter;
-    private EsHttpSourceOperations esHttpSourceOperations;
-    private EsDocumentOperations esDocumentOperations;
+    protected ServiceProvider serviceProvider;
+    protected OutputCollector collector;
+    protected MultiCountMetric eventCounter;
+    protected EsHttpSourceOperations esHttpSourceOperations;
+    protected EsDocumentOperations esDocumentOperations;
+
+    public ArticleIndexerBolt(ServiceProvider serviceProvider) {
+        this.serviceProvider = serviceProvider;
+    }
 
     @Override
     public void execute(Tuple tuple) {
@@ -104,7 +109,7 @@ public class ArticleIndexerBolt extends BaseRichBolt {
                     eventCounter.scope("analysis_incomplete").incr();
                     collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.ERROR));
                 } else {
-                    esDocumentOperations.store(article);
+                    storeDocument(article, Maps.newHashMap());
                     LOG.info("Stored article '{}'", url);
                     eventCounter.scope("analysis_success").incr();
                     collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.FETCHED));
@@ -117,6 +122,10 @@ public class ArticleIndexerBolt extends BaseRichBolt {
             }
         }
         collector.ack(tuple);
+    }
+
+    protected void storeDocument(HttpArticle article, Map<String, Object> fields) throws Exception {
+        this.esDocumentOperations.store(article, fields);
     }
 
     private Pattern dateInUrl = Pattern.compile(".*(\\d{4}/\\d{2}/\\d{2}).*");
@@ -140,11 +149,10 @@ public class ArticleIndexerBolt extends BaseRichBolt {
 
     @Override
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
-        this.eventCounter = context.registerMetric(this.getClass().getSimpleName(), new MultiCountMetric(), 10);
-        this.serviceProvider = new ServiceProvider();
         this.esHttpSourceOperations = this.serviceProvider.createEsHttpSourceOperations(conf);
         this.esDocumentOperations = this.serviceProvider.creatEsDocumentOperations(conf);
+        this.collector = collector;
+        this.eventCounter = context.registerMetric(this.getClass().getSimpleName(), new MultiCountMetric(), 10);
     }
 
     @Override

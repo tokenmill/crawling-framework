@@ -2,14 +2,14 @@ package lt.tokenmill.crawling.crawler.spout;
 
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.Status;
-import com.digitalpebble.stormcrawler.util.ConfUtils;
 import lt.tokenmill.crawling.crawler.CrawlerConstants;
 import lt.tokenmill.crawling.crawler.ServiceProvider;
 import lt.tokenmill.crawling.crawler.utils.PrioritizedSource;
 import lt.tokenmill.crawling.data.DataUtils;
 import lt.tokenmill.crawling.data.HttpSource;
 import lt.tokenmill.crawling.data.HttpUrl;
-import lt.tokenmill.crawling.es.*;
+import lt.tokenmill.crawling.es.EsHttpSourceOperations;
+import lt.tokenmill.crawling.es.EsHttpUrlOperations;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -19,17 +19,18 @@ import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class UrlGeneratorSpout extends BaseRichSpout {
 
     private static final Logger LOG = LoggerFactory.getLogger(UrlGeneratorSpout.class);
     private static final Fields FIELDS = new Fields("url", "metadata");
-    private ServiceProvider serviceProvider;
 
-    private PriorityQueue<PrioritizedSource> prioritizedSources =
-            new PriorityQueue<>(new PrioritizedSource.PrioritizedUrlComparator());
+    private final ServiceProvider serviceProvider;
 
     private EsHttpUrlOperations esUrlOperations;
     private EsHttpSourceOperations esSourceOperations;
@@ -40,6 +41,10 @@ public class UrlGeneratorSpout extends BaseRichSpout {
     private SpoutOutputCollector collector;
     private HttpSourceConfiguration configuration;
 
+    public UrlGeneratorSpout(ServiceProvider serviceProvider) {
+        this.serviceProvider = serviceProvider;
+    }
+
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(FIELDS);
@@ -47,7 +52,6 @@ public class UrlGeneratorSpout extends BaseRichSpout {
 
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-        this.serviceProvider = new ServiceProvider();
         this.esUrlOperations = this.serviceProvider.createEsHttpUrlOperations(conf);
         this.esSourceOperations = this.serviceProvider.createEsHttpSourceOperations(conf);
         this.collector = collector;

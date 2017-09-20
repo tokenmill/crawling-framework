@@ -11,20 +11,32 @@ import lt.tokenmill.crawling.crawler.bolt.LinkExtractorBolt;
 import lt.tokenmill.crawling.crawler.bolt.StatusUpdaterBolt;
 import lt.tokenmill.crawling.crawler.spout.UrlGeneratorSpout;
 import org.apache.storm.Config;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
 public class CrawlerTopology extends ConfigurableTopology {
 
+    private final ServiceProvider serviceProvider;
+
     public static void main(String[] args) throws Exception {
         ConfigurableTopology.start(new CrawlerTopology(), args);
+    }
+
+    public CrawlerTopology() {
+        this(new DefaultServiceProvider());
+    }
+
+    public CrawlerTopology(ServiceProvider serviceProvider) {
+        this.serviceProvider = serviceProvider;
     }
 
     @Override
     protected int run(String[] strings) {
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("generator", new UrlGeneratorSpout());
+        builder.setSpout("generator", createUrlGeneratorSpout(serviceProvider));
 
         builder.setBolt("partitioner", new URLPartitionerBolt())
                 .shuffleGrouping("generator");
@@ -38,13 +50,13 @@ public class CrawlerTopology extends ConfigurableTopology {
         builder.setBolt("feed", new FeedParserBolt())
                 .localOrShuffleGrouping("sitemap");
 
-        builder.setBolt("links", new LinkExtractorBolt())
+        builder.setBolt("links", createLinkExtractor(serviceProvider))
                 .localOrShuffleGrouping("feed");
 
-        builder.setBolt("index", new ArticleIndexerBolt())
+        builder.setBolt("index", createArticleIndexer(serviceProvider))
                 .localOrShuffleGrouping("fetch");
 
-        builder.setBolt("status", new StatusUpdaterBolt())
+        builder.setBolt("status", createStatusUpdater(serviceProvider))
                 .localOrShuffleGrouping("fetch", Constants.StatusStreamName)
                 .localOrShuffleGrouping("sitemap", Constants.StatusStreamName)
                 .localOrShuffleGrouping("index", Constants.StatusStreamName)
@@ -54,4 +66,21 @@ public class CrawlerTopology extends ConfigurableTopology {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
         return submit(topologyName, conf, builder);
     }
+
+    protected IRichSpout createUrlGeneratorSpout(ServiceProvider serviceProvider) {
+        return new UrlGeneratorSpout(serviceProvider);
+    }
+
+    protected IRichBolt createLinkExtractor(ServiceProvider serviceProvider) {
+        return new LinkExtractorBolt(serviceProvider);
+    }
+
+    protected IRichBolt createArticleIndexer(ServiceProvider serviceProvider) {
+        return new ArticleIndexerBolt(serviceProvider);
+    }
+
+    protected IRichBolt createStatusUpdater(ServiceProvider serviceProvider) {
+        return new StatusUpdaterBolt(serviceProvider);
+    }
+
 }
