@@ -22,10 +22,7 @@ See [Crawling Framework Example](https://github.com/tokenmill/crawling-framework
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 [TokenMill](http://www.tokenmill.co/)
 
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
+Distributed under the The Apache License, Version 2.0
 
-Copyright © 2017 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
