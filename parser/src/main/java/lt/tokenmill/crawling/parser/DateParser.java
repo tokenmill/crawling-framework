@@ -62,7 +62,7 @@ public class DateParser {
         }
         matchedText.setValue(value.replace("ET", "EST"));
         List<SimpleDateFormat> customFormatters = formatsToFormatters(source.getDateFormats());
-        return Stream.concat(FORMATTERS.stream(), customFormatters.stream())
+        return Stream.concat(customFormatters.stream(), FORMATTERS.stream())
                 .map(dateFormat -> parse(matchedText, dateFormat))
                 .filter(d -> d.getDate() != null)
                 .findFirst().orElse(matchedText);
