@@ -47,6 +47,7 @@ public class DateParser {
                 .map(DateParser::createFormatter)
                 .collect(Collectors.toList());
     }
+
     static {
         FORMATTERS = formatsToFormatters(FORMATS);
     }
@@ -92,7 +93,8 @@ public class DateParser {
             "revision_date", "parsely-pub-date",
             "pubdate", "date", "published_at", "publish_date");
 
-    private static final List<String> ITEMPROP_SELECTORS = Lists.newArrayList("[itemprop*=datePublished]", "[itemprop*=dateModified]");
+    private static final List<String> ITEMPROP_SELECTORS = Lists.newArrayList(
+            "[itemprop*=datePublished]", "[itemprop*=dateModified]", "[itemprop*=dateCreated]");
 
     public static List<MatchedDate> extractFromMeta(Document document) {
         Map<String, String> metaValues = Maps.newHashMap();
