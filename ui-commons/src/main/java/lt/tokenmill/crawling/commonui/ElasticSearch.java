@@ -9,6 +9,7 @@ public class ElasticSearch {
     private static EsHttpSourceTestOperations HTTP_SOURCE_TEST_OPERATIONS;
     private static EsNamedQueryOperations NAMED_QUERY_OPERATIONS;
     private static EsDocumentOperations DOCUMENT_OPERATIONS;
+    private static EsHttpUrlOperations URL_OPERATIONS;
 
     public static EsHttpSourceOperations getHttpSourceOperations() {
         if (HTTP_SOURCE_OPERATIONS == null) {
@@ -45,6 +46,15 @@ public class ElasticSearch {
             DOCUMENT_OPERATIONS = EsDocumentOperations.getInstance(getEsConnection(), index, type);
         }
         return DOCUMENT_OPERATIONS;
+    }
+
+    public static EsHttpUrlOperations getUrlOperations() {
+        if (URL_OPERATIONS == null) {
+            String index = Configuration.INSTANCE.getString(ElasticConstants.ES_URLS_INDEX_NAME_PARAM);
+            String type = Configuration.INSTANCE.getString(ElasticConstants.ES_URLS_DOC_TYPE_PARAM);
+            URL_OPERATIONS = EsHttpUrlOperations.getInstance(getEsConnection(), index, type);
+        }
+        return URL_OPERATIONS;
     }
 
     private static ElasticConnection getEsConnection() {

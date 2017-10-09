@@ -77,13 +77,19 @@ public class HttpSourcesView extends BaseView {
         itemsGrid.getColumn("url").setRenderer(new HtmlRenderer(), new UrlToLinkConverter());
         itemsGrid.getColumn("enabled");
         ((GeneratedPropertyContainer)itemsGrid.getContainerDataSource())
-                .addGeneratedProperty("actions", new ButtonPropertyGenerator("Test"));
-        itemsGrid.getColumn("actions").setRenderer(new ButtonRenderer(e -> {
+                .addGeneratedProperty("test", new ButtonPropertyGenerator("Test"));
+        ((GeneratedPropertyContainer)itemsGrid.getContainerDataSource())
+                .addGeneratedProperty("statistics", new ButtonPropertyGenerator("Stats"));
+        itemsGrid.getColumn("test").setRenderer(new ButtonRenderer(e -> {
             HttpSource hs = (HttpSource) e.getItemId();
             hs = ElasticSearch.getHttpSourceOperations().get(hs.getUrl());
             UI.getCurrent().addWindow(new HttpSourceTestWindow(hs));
         }));
-        itemsGrid.setColumns("name", "url", "enabled", "actions");
+        itemsGrid.getColumn("statistics").setRenderer(new ButtonRenderer(e -> {
+            HttpSource hs = (HttpSource) e.getItemId();
+            UI.getCurrent().addWindow(new HttpSourceStatsWindow(hs.getUrl()));
+        }));
+        itemsGrid.setColumns("name", "url", "enabled", "test", "statistics");
         gridLayout.addComponent(itemsGrid);
         gridLayout.addComponent(totalCountLabel);
         refreshGrid(filterField.getValue());

@@ -1,6 +1,7 @@
 package lt.tokenmill.crawling.es;
 
 import lt.tokenmill.crawling.data.HttpUrl;
+import lt.tokenmill.crawling.es.model.DateHistogramValue;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -9,6 +10,10 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,4 +98,33 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<DateHistogramValue> calculateStats(String sourceUrl) {
+        BoolQueryBuilder filter = QueryBuilders.boolQuery()
+                .must(QueryBuilders.rangeQuery("created").gte("now-1M"))
+                .must(QueryBuilders.termQuery("source", sourceUrl));
+
+        SearchResponse response = getConnection().getClient()
+                .prepareSearch(getIndex())
+                .setTypes(getType())
+                .setSearchType(SearchType.DEFAULT)
+                .setQuery(filter)
+                .addAggregation(AggregationBuilders
+                        .dateHistogram("urls_over_time")
+                        .field("created")
+                        .format("yyyy-MM-dd")
+                        .dateHistogramInterval(DateHistogramInterval.DAY))
+                .setSize(0)
+                .setFetchSource(true)
+                .setExplain(false)
+                .execute()
+                .actionGet();
+
+        InternalDateHistogram hits = response.getAggregations().get("urls_over_time");
+        return hits.getBuckets().stream()
+                .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))
+                .collect(Collectors.toList());
+    }
+
+
 }
