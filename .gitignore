@@ -4,4 +4,4 @@ target/
 *.retry
 
 **/*.gwt.xml
-
+crawler/logs/
