@@ -57,8 +57,8 @@ es.urls.index.name: "urls"
 es.urls.doc.type: "url"
 es.docs.index.name: "docs"
 es.docs.doc.type: "doc"
-es.httpsource.index.name: "http-sources"
-es.httpsource.doc.type: "http-source"
+es.httpsource.index.name: "http_sources"
+es.httpsource.doc.type: "http_source"
 
 # MetricsConsumer configuration
 es.metrics.addresses: "localhost:9300"
