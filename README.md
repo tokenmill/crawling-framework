@@ -9,6 +9,12 @@ Crawling Framework aims at providing instruments to configure and run your [Stor
 
 Once configuration is done Crawling Framework runs [Storm Crawler](http://stormcrawler.net/) based crawling following the rules specified in the configuration.
 
+## Introduction
+
+We have recorder a video on how to setup and use Crawling Framework. Click on the image below to watch in on Youtube.
+
+[![Crawling Framework Intro](https://img.youtube.com/vi/AvO4lmmIuis/0.jpg)](https://www.youtube.com/watch?v=AvO4lmmIuis)
+
 ## Requirements
 
 Framework writes its configuration and stores crawled data to ElasticSearch. Before starting crawl project [install ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html) (Crawling Framework is tested to work with Elastic v5.5.x).
