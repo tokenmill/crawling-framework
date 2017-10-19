@@ -11,7 +11,7 @@ Once configuration is done Crawling Framework runs [Storm Crawler](http://stormc
 
 ## Introduction
 
-We have recorder a video on how to setup and use Crawling Framework. Click on the image below to watch in on Youtube.
+We have recorded a video on how to setup and use Crawling Framework. Click on the image below to watch in on Youtube.
 
 [![Crawling Framework Intro](https://img.youtube.com/vi/AvO4lmmIuis/0.jpg)](https://www.youtube.com/watch?v=AvO4lmmIuis)
 
