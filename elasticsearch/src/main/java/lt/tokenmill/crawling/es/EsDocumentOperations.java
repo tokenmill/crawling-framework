@@ -86,7 +86,7 @@ public class EsDocumentOperations extends BaseElasticOps {
                 .actionGet();
 
         List<HttpArticle> items = Arrays.stream(response.getHits().getHits())
-                .map(SearchHit::getSource)
+                .map(SearchHit::getSourceAsMap)
                 .filter(Objects::nonNull)
                 .map(this::mapToHttpArticle)
                 .collect(Collectors.toList());
@@ -137,7 +137,7 @@ public class EsDocumentOperations extends BaseElasticOps {
                 .actionGet();
 
         List<HighlightedSearchResult> items = Arrays.stream(response.getHits().getHits())
-                .filter(sh -> sh.getSource() != null)
+                .filter(sh -> sh.getSourceAsMap() != null)
                 .map(this::mapToHighlightedResult)
                 .collect(Collectors.toList());
         return PageableList.create(items, response.getHits().getTotalHits());
@@ -228,7 +228,7 @@ public class EsDocumentOperations extends BaseElasticOps {
     }
 
     private HighlightedSearchResult mapToHighlightedResult(SearchHit hit) {
-        HttpArticle article = mapToHttpArticle(hit.getSource());
+        HttpArticle article = mapToHttpArticle(hit.getSourceAsMap());
         List<String> highlights = Lists.newArrayList();
         for (Map.Entry<String, HighlightField> fields : hit.getHighlightFields().entrySet()) {
             for (Text text : fields.getValue().getFragments()) {

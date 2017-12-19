@@ -57,7 +57,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                 .actionGet();
 
         List<NamedQuery> items = Arrays.stream(response.getHits().getHits())
-                .map(SearchHit::getSource)
+                .map(SearchHit::getSourceAsMap)
                 .filter(Objects::nonNull)
                 .map(this::mapToNamedQuery)
                 .collect(Collectors.toList());
@@ -113,7 +113,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
         List<NamedQuery> result = Lists.newArrayList();
         do {
             result.addAll(Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSource)
+                    .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToNamedQuery)
                     .collect(Collectors.toList()));
@@ -169,7 +169,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                 .actionGet();
         do {
            Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSource)
+                    .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToNamedQuery)
                     .forEach(this::delete);

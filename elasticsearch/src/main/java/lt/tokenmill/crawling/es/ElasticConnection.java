@@ -5,7 +5,7 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
@@ -40,7 +40,7 @@ public class ElasticConnection {
                 .build();
         try {
             return new PreBuiltTransportClient(settings).addTransportAddress(
-                    new InetSocketTransportAddress(InetAddress.getByName(hostname), transportPort));
+                    new TransportAddress(InetAddress.getByName(hostname), transportPort));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

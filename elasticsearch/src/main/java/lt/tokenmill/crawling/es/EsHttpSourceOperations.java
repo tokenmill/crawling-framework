@@ -59,7 +59,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
 
         SearchHits hits = response.getHits();
         return Arrays.stream(hits.getHits())
-                .map(SearchHit::sourceAsMap)
+                .map(SearchHit::getSourceAsMap)
                 .map(this::mapToHttpSource)
                 .collect(Collectors.toList());
 
@@ -94,7 +94,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                 .actionGet();
 
         List<HttpSource> items = Arrays.stream(response.getHits().getHits())
-                .map(SearchHit::getSource)
+                .map(SearchHit::getSourceAsMap)
                 .filter(Objects::nonNull)
                 .map(this::mapToHttpSource)
                 .sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()))
@@ -123,7 +123,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
         List<HttpSource> result = Lists.newArrayList();
         do {
             result.addAll(Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSource)
+                    .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToHttpSource)
                     .collect(Collectors.toList()));
@@ -193,7 +193,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                 .actionGet();
         do {
            Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSource)
+                    .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToHttpSource)
                     .map(HttpSource::getUrl)

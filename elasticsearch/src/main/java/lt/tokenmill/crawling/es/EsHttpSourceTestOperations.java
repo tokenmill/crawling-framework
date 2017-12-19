@@ -52,7 +52,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                 .actionGet();
 
         List<HttpSourceTest> items = Arrays.stream(response.getHits().getHits())
-                .map(SearchHit::getSource)
+                .map(SearchHit::getSourceAsMap)
                 .filter(Objects::nonNull)
                 .map(this::mapToHttpSourceTest)
                 .collect(Collectors.toList());
@@ -90,7 +90,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
         List<HttpSourceTest> result = Lists.newArrayList();
         do {
             result.addAll(Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSource)
+                    .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToHttpSourceTest)
                     .collect(Collectors.toList()));
@@ -145,7 +145,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                 .actionGet();
         do {
            Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSource)
+                    .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToHttpSourceTest)
                     .map(HttpSourceTest::getUrl)

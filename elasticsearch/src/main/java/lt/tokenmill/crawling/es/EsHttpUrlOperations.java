@@ -87,7 +87,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
 
         SearchHits hits = response.getHits();
         return Arrays.stream(hits.getHits())
-                .map(SearchHit::getSource)
+                .map(SearchHit::getSourceAsMap)
                 .map(s -> {
                     HttpUrl httpUrl = new HttpUrl();
                     httpUrl.setUrl(Objects.toString(s.get("url"), null));
