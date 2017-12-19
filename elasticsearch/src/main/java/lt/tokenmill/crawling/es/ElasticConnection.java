@@ -12,11 +12,14 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class ElasticConnection {
+    private static final Logger LOG = LoggerFactory.getLogger(ElasticConnection.class);
 
     private static final int DEFAULT_TRANSPORT_PORT = 9300;
     private static final int DEFAULT_REST_PORT = 9200;
@@ -71,6 +74,7 @@ public class ElasticConnection {
     }
 
     private static ElasticConnection getConnection(String hostname, int transportPort, int restPort, String restScheme, String flushIntervalString, int bulkActions, BulkProcessor.Listener listener) {
+        LOG.info("Creating ElasticConnection with params {} {} {} {}", hostname, transportPort, restPort, restScheme);
         System.setProperty("es.set.netty.runtime.available.processors", "false");
 
         TimeValue flushInterval = TimeValue.parseTimeValue(flushIntervalString, TimeValue.timeValueSeconds(5), "flush");

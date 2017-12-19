@@ -3,6 +3,7 @@ package lt.tokenmill.crawling.es;
 import lt.tokenmill.crawling.data.HttpSource;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class EsHttpUrlOperationsTest {
     }
 
     @Test
+    @Ignore
     public void testEsHttpSourceOperations000() throws IOException {
         ElasticConnection connection = ElasticConnection.getConnection(ES_TEST_HOST, ES_TRANSPORT_TEST_PORT);
 

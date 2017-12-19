@@ -82,7 +82,7 @@ public class ElasticsearchTestServer {
 
         private boolean cleanDataDir = true;
         private String dataDirectory = "target/elasticsearch-data";
-        private int httpPort = 9501;
+        private int httpPort = 9200;
         private int transportPort = 9305;
 
         public Builder httpPort(int httpPort) {
