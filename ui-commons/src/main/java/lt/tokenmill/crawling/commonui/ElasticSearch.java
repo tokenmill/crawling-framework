@@ -60,8 +60,9 @@ public class ElasticSearch {
     private static ElasticConnection getEsConnection() {
         if (CONNECTION == null) {
             String hostname = Configuration.INSTANCE.getString(ElasticConstants.ES_HOSTNAME_PARAM, "localhost");
-            int transportPort = Configuration.INSTANCE.getInt(ElasticConstants.ES_TRANSPORT_PORT_PARAM, 9300);
-            CONNECTION = ElasticConnection.getConnection(hostname, transportPort);
+            int restPort = Configuration.INSTANCE.getInt(ElasticConstants.ES_REST_PORT, 9200);
+            String restScheme =  Configuration.INSTANCE.getString(ElasticConstants.ES_REST_SCHEME, "http");
+            CONNECTION = ElasticConnection.getConnection(hostname, restPort, restScheme);
         }
         return CONNECTION;
     }

@@ -17,11 +17,12 @@ public class DefaultServiceProvider implements ServiceProvider, Serializable {
 
     public static ElasticConnection getElasticConnection(Map conf) {
         String hostname = ConfUtils.getString(conf, ElasticConstants.ES_HOSTNAME_PARAM);
-        int transportPort = ConfUtils.getInt(conf, ElasticConstants.ES_TRANSPORT_PORT_PARAM, 9300);
+        int restPort = ConfUtils.getInt(conf, ElasticConstants.ES_REST_PORT, 9200);
+        String restScheme =  ConfUtils.getString(conf, ElasticConstants.ES_REST_SCHEME, "http");
         if (ES_CONNECTIONS.containsKey(hostname)) {
             return ES_CONNECTIONS.get(hostname);
         } else {
-            ElasticConnection elasticConnection = ElasticConnection.getConnection(hostname, transportPort);
+            ElasticConnection elasticConnection = ElasticConnection.getConnection(hostname, restPort, restScheme);
             ES_CONNECTIONS.put(hostname, elasticConnection);
             return ES_CONNECTIONS.get(hostname);
         }

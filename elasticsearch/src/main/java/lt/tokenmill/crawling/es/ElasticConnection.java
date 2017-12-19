@@ -4,7 +4,6 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -17,7 +16,6 @@ import java.io.IOException;
 public class ElasticConnection {
     private static final Logger LOG = LoggerFactory.getLogger(ElasticConnection.class);
 
-    private static final int DEFAULT_TRANSPORT_PORT = 9300;
     private static final int DEFAULT_REST_PORT = 9200;
     private static final String DEFAULT_REST_SCHEME = "http";
     private static final int DEFAULT_BULK_ACTIONS = 10;
@@ -42,11 +40,6 @@ public class ElasticConnection {
     }
 
     public static ElasticConnection getConnection(String hostname) {
-        return getConnection(hostname, DEFAULT_REST_PORT, DEFAULT_REST_SCHEME, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
-    }
-
-    @Deprecated
-    public static ElasticConnection getConnection(String hostname, int transportPort) {
         return getConnection(hostname, DEFAULT_REST_PORT, DEFAULT_REST_SCHEME, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
     }
 

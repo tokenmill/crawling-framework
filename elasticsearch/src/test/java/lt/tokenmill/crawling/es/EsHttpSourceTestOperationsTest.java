@@ -20,7 +20,8 @@ public class EsHttpSourceTestOperationsTest {
     private static final Logger LOG = LoggerFactory.getLogger(EsHttpSourceTestOperationsTest.class);
 
     private static final String ES_TEST_HOST = "127.0.0.1";
-    private static final int ES_HTTP_TEST_PORT = 9205;
+    private static final int ES_REST_TEST_PORT = 9205;
+    private static final String ES_REST_TEST_SCHEME = "http";
     private static final int ES_TRANSPORT_TEST_PORT = 9305;
     private static final String ES_DATA_DIRECTORY = "target/elasticsearch-data";
     private static final boolean ES_CLEAN_DATA_DIR = true;
@@ -34,7 +35,7 @@ public class EsHttpSourceTestOperationsTest {
     public void before() throws Exception {
         LOG.info("Setting ES server up!");
         this.elasticsearchTestServer = ElasticsearchTestServer.builder()
-                .httpPort(ES_HTTP_TEST_PORT)
+                .httpPort(ES_REST_TEST_PORT)
                 .transportPort(ES_TRANSPORT_TEST_PORT)
                 .dataDirectory(ES_DATA_DIRECTORY)
                 .cleanDataDir(ES_CLEAN_DATA_DIR)
@@ -42,7 +43,7 @@ public class EsHttpSourceTestOperationsTest {
         this.elasticsearchTestServer.start();
 
         String indexConf = TestUtils.readResourceAsString(INDEX_CONF_RESOURCE_FILE);
-        new IndexManager(ES_TEST_HOST, ES_HTTP_TEST_PORT).prepare(INDEX_ALIAS, indexConf, true);
+        new IndexManager(ES_TEST_HOST, ES_REST_TEST_PORT).prepare(INDEX_ALIAS, indexConf, true);
     }
 
     @After
@@ -63,7 +64,7 @@ public class EsHttpSourceTestOperationsTest {
         httpSourceTest.setText("Some text");
         httpSourceTest.setDate(Instant.now().toString());
 
-        ElasticConnection connection = ElasticConnection.getConnection(ES_TEST_HOST, ES_TRANSPORT_TEST_PORT);
+        ElasticConnection connection = ElasticConnection.getConnection(ES_TEST_HOST, ES_REST_TEST_PORT, ES_REST_TEST_SCHEME);
         EsHttpSourceTestOperations esHttpSourceTestOperations = EsHttpSourceTestOperations.getInstance(connection, INDEX_ALIAS, DOC_TYPE);
 
         assertEquals(0, esHttpSourceTestOperations.all().size());

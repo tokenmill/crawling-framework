@@ -18,6 +18,7 @@ public class EsHttpUrlOperationsTest {
 
     private static final String ES_TEST_HOST = "127.0.0.1";
     private static final int ES_HTTP_TEST_PORT = 9205;
+    private static final String ES_REST_TEST_SCHEME = "http";
     private static final int ES_TRANSPORT_TEST_PORT = 9305;
     private static final String ES_DATA_DIRECTORY = "target/elasticsearch-data";
     private static final boolean ES_CLEAN_DATA_DIR = true;
@@ -51,7 +52,7 @@ public class EsHttpUrlOperationsTest {
     @Test
     @Ignore
     public void testEsHttpSourceOperations000() throws IOException {
-        ElasticConnection connection = ElasticConnection.getConnection(ES_TEST_HOST, ES_TRANSPORT_TEST_PORT);
+        ElasticConnection connection = ElasticConnection.getConnection(ES_TEST_HOST, ES_HTTP_TEST_PORT, ES_REST_TEST_SCHEME);
 
         EsHttpSourceOperations esHttpSourceOperations = EsHttpSourceOperations.getInstance(connection, INDEX_ALIAS, DOC_TYPE);
 
