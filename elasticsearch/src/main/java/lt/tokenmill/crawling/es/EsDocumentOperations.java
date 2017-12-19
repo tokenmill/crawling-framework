@@ -6,10 +6,11 @@ import com.google.common.collect.Sets;
 import lt.tokenmill.crawling.data.*;
 import lt.tokenmill.crawling.es.model.DateHistogramValue;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -17,10 +18,10 @@ import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
@@ -64,83 +65,96 @@ public class EsDocumentOperations extends BaseElasticOps {
     }
 
     public PageableList<HttpArticle> query(NamedQuery... queries) {
-        BoolQueryBuilder query = QueryBuilders.boolQuery();
-        for (NamedQuery nq : queries) {
-            addQuery(query, true, nq.getNotStemmedCaseSensitive(), "nostem_cs");
-            addQuery(query, true, nq.getNotStemmedCaseInSensitive(), "nostem_ci");
-            addQuery(query, true, nq.getStemmedCaseSensitive(), "stem_cs");
-            addQuery(query, true, nq.getStemmedCaseInSensitive(), "stem_ci");
-            if (!Strings.isNullOrEmpty(nq.getAdvanced())) {
-                query.must(QueryBuilders.queryStringQuery(nq.getAdvanced())
-                        .defaultOperator(Operator.AND));
+        try {
+            BoolQueryBuilder query = QueryBuilders.boolQuery();
+            for (NamedQuery nq : queries) {
+                addQuery(query, true, nq.getNotStemmedCaseSensitive(), "nostem_cs");
+                addQuery(query, true, nq.getNotStemmedCaseInSensitive(), "nostem_ci");
+                addQuery(query, true, nq.getStemmedCaseSensitive(), "stem_cs");
+                addQuery(query, true, nq.getStemmedCaseInSensitive(), "stem_ci");
+                if (!Strings.isNullOrEmpty(nq.getAdvanced())) {
+                    query.must(QueryBuilders.queryStringQuery(nq.getAdvanced())
+                            .defaultOperator(Operator.AND));
+                }
             }
-        }
-        SearchResponse response = getConnection().getClient().prepareSearch(getIndex())
-                .setTypes(getType())
-                .setQuery(query)
-                .setSize(100)
-                .setFetchSource(true)
-                .addSort(PUBLISHED_FIELD, SortOrder.DESC)
-                .setExplain(false)
-                .execute()
-                .actionGet();
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                    .explain(false)
+                    .fetchSource(true)
+                    .sort(PUBLISHED_FIELD, SortOrder.DESC)
+                    .size(100).query(query);
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .source(searchSourceBuilder);
+            SearchResponse response = getConnection().getRestHighLevelClient()
+                    .search(searchRequest);
 
-        List<HttpArticle> items = Arrays.stream(response.getHits().getHits())
-                .map(SearchHit::getSourceAsMap)
-                .filter(Objects::nonNull)
-                .map(this::mapToHttpArticle)
-                .collect(Collectors.toList());
-        return PageableList.create(items, response.getHits().getTotalHits());
+            List<HttpArticle> items = Arrays.stream(response.getHits().getHits())
+                    .map(SearchHit::getSourceAsMap)
+                    .filter(Objects::nonNull)
+                    .map(this::mapToHttpArticle)
+                    .collect(Collectors.toList());
+            return PageableList.create(items, response.getHits().getTotalHits());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new PageableList<>();
     }
 
     public PageableList<HighlightedSearchResult> query(List<NamedQuery> included, List<NamedQuery> excluded, String additional) {
-        BoolQueryBuilder query = QueryBuilders.boolQuery();
-        for (NamedQuery nq : included) {
-            addQuery(query, true, nq.getNotStemmedCaseSensitive(), "nostem_cs");
-            addQuery(query, true, nq.getNotStemmedCaseInSensitive(), "nostem_ci");
-            addQuery(query, true, nq.getStemmedCaseSensitive(), "stem_cs");
-            addQuery(query, true, nq.getStemmedCaseInSensitive(), "stem_ci");
-            if (!Strings.isNullOrEmpty(nq.getAdvanced())) {
-                query.must(QueryBuilders.queryStringQuery(nq.getAdvanced())
-                        .defaultOperator(Operator.AND));
+        try {
+            BoolQueryBuilder query = QueryBuilders.boolQuery();
+            for (NamedQuery nq : included) {
+                addQuery(query, true, nq.getNotStemmedCaseSensitive(), "nostem_cs");
+                addQuery(query, true, nq.getNotStemmedCaseInSensitive(), "nostem_ci");
+                addQuery(query, true, nq.getStemmedCaseSensitive(), "stem_cs");
+                addQuery(query, true, nq.getStemmedCaseInSensitive(), "stem_ci");
+                if (!Strings.isNullOrEmpty(nq.getAdvanced())) {
+                    query.must(QueryBuilders.queryStringQuery(nq.getAdvanced())
+                            .defaultOperator(Operator.AND));
+                }
             }
-        }
-        for (NamedQuery nq : excluded) {
-            addQuery(query, false, nq.getNotStemmedCaseSensitive(), "nostem_cs");
-            addQuery(query, false, nq.getNotStemmedCaseInSensitive(), "nostem_ci");
-            addQuery(query, false, nq.getStemmedCaseSensitive(), "stem_cs");
-            addQuery(query, false, nq.getStemmedCaseInSensitive(), "stem_ci");
-            if (!Strings.isNullOrEmpty(nq.getAdvanced())) {
-                query.mustNot(QueryBuilders.queryStringQuery(nq.getAdvanced())
-                        .defaultOperator(Operator.AND));
+            for (NamedQuery nq : excluded) {
+                addQuery(query, false, nq.getNotStemmedCaseSensitive(), "nostem_cs");
+                addQuery(query, false, nq.getNotStemmedCaseInSensitive(), "nostem_ci");
+                addQuery(query, false, nq.getStemmedCaseSensitive(), "stem_cs");
+                addQuery(query, false, nq.getStemmedCaseInSensitive(), "stem_ci");
+                if (!Strings.isNullOrEmpty(nq.getAdvanced())) {
+                    query.mustNot(QueryBuilders.queryStringQuery(nq.getAdvanced())
+                            .defaultOperator(Operator.AND));
+                }
             }
-        }
-        if (!Strings.isNullOrEmpty(additional)) {
-            query.must(QueryBuilders.queryStringQuery(QueryParser.escape(additional))
-                    .field("title.nostem_ci")
-                    .field("text.nostem_ci")
-                    .defaultOperator(Operator.AND));
-        }
-        SearchResponse response = getConnection().getClient().prepareSearch(getIndex())
-                .setTypes(getType())
-                .setQuery(query)
-                .setSize(100)
-                .setFetchSource(true)
-                .highlighter(new HighlightBuilder()
-                        .field("text.nostem_cs")
+            if (!Strings.isNullOrEmpty(additional)) {
+                query.must(QueryBuilders.queryStringQuery(QueryParser.escape(additional))
+                        .field("title.nostem_ci")
                         .field("text.nostem_ci")
-                        .field("text.stem_cs")
-                        .field("text.stem_ci"))
-                .addSort(PUBLISHED_FIELD, SortOrder.DESC)
-                .setExplain(false)
-                .execute()
-                .actionGet();
+                        .defaultOperator(Operator.AND));
+            }
+            SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
+                    .query(query)
+                    .size(100)
+                    .fetchSource(true)
+                    .explain(false)
+                    .highlighter(new HighlightBuilder()
+                            .field("text.nostem_cs")
+                            .field("text.nostem_ci")
+                            .field("text.stem_cs")
+                            .field("text.stem_ci"))
+                    .sort(PUBLISHED_FIELD, SortOrder.DESC);
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .source(sourceBuilder);
+            SearchResponse response = getConnection().getRestHighLevelClient()
+                    .search(searchRequest);
 
-        List<HighlightedSearchResult> items = Arrays.stream(response.getHits().getHits())
-                .filter(sh -> sh.getSourceAsMap() != null)
-                .map(this::mapToHighlightedResult)
-                .collect(Collectors.toList());
-        return PageableList.create(items, response.getHits().getTotalHits());
+            List<HighlightedSearchResult> items = Arrays.stream(response.getHits().getHits())
+                    .filter(sh -> sh.getSourceAsMap() != null)
+                    .map(this::mapToHighlightedResult)
+                    .collect(Collectors.toList());
+            return PageableList.create(items, response.getHits().getTotalHits());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new PageableList<>();
     }
 
     private void addQuery(BoolQueryBuilder boolQuery, boolean positive, String query, String modifier) {
@@ -167,37 +181,40 @@ public class EsDocumentOperations extends BaseElasticOps {
         jsonBuilder.startObject();
         applyFields(jsonBuilder, article, fields);
         jsonBuilder.endObject();
-        IndexRequestBuilder insert = getConnection().getClient()
-                .prepareIndex(getIndex(), getType(), article.getUrl())
-                .setSource(jsonBuilder);
-        getConnection().getProcessor().add(insert.request());
+        IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(article.getUrl()))
+                .source(jsonBuilder);
+        getConnection().getProcessor().add(indexRequest);
     }
 
     public List<DateHistogramValue> calculateStats(String sourceUrl) {
-        BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                .must(QueryBuilders.rangeQuery("created").gte("now-1M"))
-                .must(QueryBuilders.termQuery("source", sourceUrl));
+        try {
+            BoolQueryBuilder filter = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.rangeQuery("created").gte("now-1M"))
+                    .must(QueryBuilders.termQuery("source", sourceUrl));
 
-        SearchResponse response = getConnection().getClient()
-                .prepareSearch(getIndex())
-                .setTypes(getType())
-                .setSearchType(SearchType.DEFAULT)
-                .setQuery(filter)
-                .addAggregation(AggregationBuilders
-                        .dateHistogram("urls_over_time")
-                        .field("created")
-                        .format("yyyy-MM-dd")
-                        .dateHistogramInterval(DateHistogramInterval.DAY))
-                .setSize(0)
-                .setFetchSource(true)
-                .setExplain(false)
-                .execute()
-                .actionGet();
-
-        InternalDateHistogram hits = response.getAggregations().get("urls_over_time");
-        return hits.getBuckets().stream()
-                .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))
-                .collect(Collectors.toList());
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .searchType(SearchType.DEFAULT)
+                    .source(new SearchSourceBuilder()
+                            .query(filter)
+                            .aggregation(AggregationBuilders
+                                    .dateHistogram("urls_over_time")
+                                    .field("created")
+                                    .format("yyyy-MM-dd")
+                                    .dateHistogramInterval(DateHistogramInterval.DAY))
+                            .explain(false)
+                            .fetchSource(true)
+                            .size(0));
+            SearchResponse response = getConnection().getRestHighLevelClient()
+                    .search(searchRequest);
+            InternalDateHistogram hits = response.getAggregations().get("urls_over_time");
+            return hits.getBuckets().stream()
+                    .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     private void applyField(XContentBuilder builder, String fieldName,
