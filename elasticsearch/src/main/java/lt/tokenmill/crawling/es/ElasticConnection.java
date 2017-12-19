@@ -42,19 +42,20 @@ public class ElasticConnection {
     }
 
     public static ElasticConnection getConnection(String hostname) {
-        return getConnection(hostname, DEFAULT_TRANSPORT_PORT, DEFAULT_REST_PORT, DEFAULT_REST_SCHEME, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
+        return getConnection(hostname, DEFAULT_REST_PORT, DEFAULT_REST_SCHEME, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
     }
 
+    @Deprecated
     public static ElasticConnection getConnection(String hostname, int transportPort) {
-        return getConnection(hostname, transportPort, DEFAULT_REST_PORT, DEFAULT_REST_SCHEME, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
+        return getConnection(hostname, DEFAULT_REST_PORT, DEFAULT_REST_SCHEME, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
     }
 
-    public static ElasticConnection getConnection(String hostname, int transportPort, int restPort, String restScheme) {
-        return getConnection(hostname, transportPort, restPort, restScheme, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
+    public static ElasticConnection getConnection(String hostname, int restPort, String restScheme) {
+        return getConnection(hostname, restPort, restScheme, DEFAULT_FLUSH_INTERVAL_STRING, DEFAULT_BULK_ACTIONS, DEFAULT_BULK_LISTENER);
     }
 
-    private static ElasticConnection getConnection(String hostname, int transportPort, int restPort, String restScheme, String flushIntervalString, int bulkActions, BulkProcessor.Listener listener) {
-        LOG.info("Creating ElasticConnection with params {} {} {} {}", hostname, transportPort, restPort, restScheme);
+    private static ElasticConnection getConnection(String hostname, int restPort, String restScheme, String flushIntervalString, int bulkActions, BulkProcessor.Listener listener) {
+        LOG.info("Creating ElasticConnection with params {} {} {}", hostname, restPort, restScheme);
         System.setProperty("es.set.netty.runtime.available.processors", "false");
 
         TimeValue flushInterval = TimeValue.parseTimeValue(flushIntervalString, TimeValue.timeValueSeconds(5), "flush");
