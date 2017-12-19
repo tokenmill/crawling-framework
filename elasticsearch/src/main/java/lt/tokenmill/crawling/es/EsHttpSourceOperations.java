@@ -6,16 +6,26 @@ import lt.tokenmill.crawling.data.DataUtils;
 import lt.tokenmill.crawling.data.HttpSource;
 import lt.tokenmill.crawling.data.PageableList;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,130 +52,158 @@ public class EsHttpSourceOperations extends BaseElasticOps {
     }
 
     public List<HttpSource> findEnabledSources() {
-        BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("enabled", true));
+        try {
+            BoolQueryBuilder filter = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.termQuery("enabled", true));
 
-        SearchResponse response = getConnection().getClient()
-                .prepareSearch(getIndex())
-                .setTypes(getType())
-                .setSearchType(SearchType.DEFAULT)
-                .setPostFilter(filter)
-                .addSort("updated", SortOrder.ASC)
-                .setSize(10000)
-                .setFetchSource(true)
-                .setExplain(false)
-                .execute()
-                .actionGet();
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                    .query(filter)
+                    .sort("updated", SortOrder.ASC)
+                    .size(10000)
+                    .fetchSource(true)
+                    .explain(false);
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .searchType(SearchType.DEFAULT)
+                    .source(searchSourceBuilder);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
 
-        SearchHits hits = response.getHits();
-        return Arrays.stream(hits.getHits())
-                .map(SearchHit::getSourceAsMap)
-                .map(this::mapToHttpSource)
-                .collect(Collectors.toList());
-
+            SearchHits hits = response.getHits();
+            return Arrays.stream(hits.getHits())
+                    .map(SearchHit::getSourceAsMap)
+                    .map(this::mapToHttpSource)
+                    .collect(Collectors.toList());
+        } catch (ElasticsearchStatusException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     public HttpSource get(String url) {
-        GetResponse response = getConnection().getClient().prepareGet(getIndex(), getType(), url)
-                .setFetchSource(true)
-                .get();
-        if (response.isExists()) {
-            return mapToHttpSource(response.getSource());
+        try {
+            GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
+                    .fetchSourceContext(new FetchSourceContext(true));
+            GetResponse response = getConnection().getRestHighLevelClient().get(getRequest);
+            if (response.isExists()) {
+                return mapToHttpSource(response.getSource());
+            }
+        } catch (ElasticsearchStatusException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
 
     public PageableList<HttpSource> filter(String text) {
-        BoolQueryBuilder filter = QueryBuilders.boolQuery();
-        if (!Strings.isNullOrEmpty(text)) {
-            filter.must(QueryBuilders
-                    .queryStringQuery(QueryParser.escape(text.trim()))
-                    .field("search_field")
-                    .defaultOperator(QueryStringQueryBuilder.DEFAULT_OPERATOR.AND));
-        }
+        try {
+            BoolQueryBuilder filter = QueryBuilders.boolQuery();
+            if (!Strings.isNullOrEmpty(text)) {
+                filter.must(QueryBuilders
+                        .queryStringQuery(QueryParser.escape(text.trim()))
+                        .field("search_field")
+                        .defaultOperator(Operator.AND));
+            }
 
-        SearchResponse response = getConnection().getClient().prepareSearch(getIndex())
-                .setTypes(getType())
-                .setPostFilter(filter)
-                .setSize(100)
-                .setFetchSource(true)
-                .setExplain(false)
-                .execute()
-                .actionGet();
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                    .query(filter)
+                    .size(100)
+                    .fetchSource(true)
+                    .explain(false);
 
-        List<HttpSource> items = Arrays.stream(response.getHits().getHits())
-                .map(SearchHit::getSourceAsMap)
-                .filter(Objects::nonNull)
-                .map(this::mapToHttpSource)
-                .sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()))
-                .collect(Collectors.toList());
-        return PageableList.create(items, response.getHits().getTotalHits());
-    }
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .searchType(SearchType.DEFAULT)
+                    .source(searchSourceBuilder);
 
-    public List<HttpSource> all() {
-        BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                .must(QueryBuilders.existsQuery("url"))
-                .must(QueryBuilders.existsQuery("name"));
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
 
-
-        Client client = getConnection().getClient();
-        TimeValue keepAlive = TimeValue.timeValueMinutes(10);
-        SearchResponse response = client.prepareSearch(getIndex())
-                .setTypes(getType())
-                .setPostFilter(filter)
-                .setSize(100)
-                .setScroll(keepAlive)
-                .setFetchSource(true)
-                .setExplain(false)
-                .execute()
-                .actionGet();
-
-        List<HttpSource> result = Lists.newArrayList();
-        do {
-            result.addAll(Arrays.stream(response.getHits().getHits())
+            List<HttpSource> items = Arrays.stream(response.getHits().getHits())
                     .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToHttpSource)
-                    .collect(Collectors.toList()));
-            response = client.prepareSearchScroll(response.getScrollId())
-                    .setScroll(keepAlive)
-                    .execute()
-                    .actionGet();
-        } while (response.getHits().getHits().length != 0);
-        return result;
+                    .sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()))
+                    .collect(Collectors.toList());
+            return PageableList.create(items, response.getHits().getTotalHits());
+        } catch (ElasticsearchStatusException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new PageableList<>();
+    }
+
+    public List<HttpSource> all() {
+        try {
+            BoolQueryBuilder filter = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.existsQuery("url"))
+                    .must(QueryBuilders.existsQuery("name"));
+
+            TimeValue keepAlive = TimeValue.timeValueMinutes(10);
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                    .explain(false)
+                    .fetchSource(true)
+                    .size(100)
+                    .query(filter);
+
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .scroll(keepAlive)
+                    .source(searchSourceBuilder);
+
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            List<HttpSource> result = Lists.newArrayList();
+            do {
+                result.addAll(Arrays.stream(response.getHits().getHits())
+                        .map(SearchHit::getSourceAsMap)
+                        .filter(Objects::nonNull)
+                        .map(this::mapToHttpSource)
+                        .collect(Collectors.toList()));
+
+                SearchScrollRequest searchScrollRequest = new SearchScrollRequest(response.getScrollId())
+                        .scroll(keepAlive);
+                response = getConnection().getRestHighLevelClient().searchScroll(searchScrollRequest);
+            } while (response.getHits().getHits().length != 0);
+            return result;
+        } catch (ElasticsearchStatusException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     public void save(HttpSource source) {
         try {
             String url = source.getUrl().toLowerCase();
-            getConnection().getClient().prepareIndex(getIndex(), getType(), url)
-                    .setSource(jsonBuilder()
-                            .startObject()
-                            .field("url", url)
-                            .field("name", source.getName().trim())
-                            .field("language", source.getLanguage() != null ? source.getLanguage().trim() : null)
-                            .field("timezone", source.getTimezone() != null ? source.getTimezone().trim() : null)
-                            .field("enabled", source.isEnabled())
-                            .field("discovery_enabled", source.isDiscoveryEnabled())
-                            .field("url_crawl_delay_secs", source.getUrlRecrawlDelayInSecs())
-                            .field("feed_crawl_delay_secs", source.getFeedRecrawlDelayInSecs())
-                            .field("sitemap_crawl_delay_secs", source.getSitemapRecrawlDelayInSecs())
-                            .field("urls", Utils.listToText(source.getUrls()))
-                            .field("feeds", Utils.listToText(source.getFeeds()))
-                            .field("sitemaps", Utils.listToText(source.getSitemaps()))
-                            .field("categories", Utils.listToText(source.getCategories()))
-                            .field("app_ids", Utils.listToText(source.getAppIds()))
-                            .field("url_filters", Utils.listToText(source.getUrlFilters()))
-                            .field("url_normalizers", Utils.listToText(source.getUrlNormalizers()))
-                            .field("title_selectors", Utils.listToText(source.getTitleSelectors()))
-                            .field("text_selectors", Utils.listToText(source.getTextSelectors()))
-                            .field("text_normalizers", Utils.listToText(source.getTextNormalizers()))
-                            .field("date_selectors", Utils.listToText(source.getDateSelectors()))
-                            .field("date_regexps", Utils.listToText(source.getDateRegexps()))
-                            .field("date_formats", Utils.listToText(source.getDateFormats()))
-                            .field("updated", new Date())
-                            .endObject())
-                    .get();
+            XContentBuilder xContentBuilder = jsonBuilder()
+                    .startObject()
+                    .field("url", url)
+                    .field("name", source.getName().trim())
+                    .field("language", source.getLanguage() != null ? source.getLanguage().trim() : null)
+                    .field("timezone", source.getTimezone() != null ? source.getTimezone().trim() : null)
+                    .field("enabled", source.isEnabled())
+                    .field("discovery_enabled", source.isDiscoveryEnabled())
+                    .field("url_crawl_delay_secs", source.getUrlRecrawlDelayInSecs())
+                    .field("feed_crawl_delay_secs", source.getFeedRecrawlDelayInSecs())
+                    .field("sitemap_crawl_delay_secs", source.getSitemapRecrawlDelayInSecs())
+                    .field("urls", Utils.listToText(source.getUrls()))
+                    .field("feeds", Utils.listToText(source.getFeeds()))
+                    .field("sitemaps", Utils.listToText(source.getSitemaps()))
+                    .field("categories", Utils.listToText(source.getCategories()))
+                    .field("app_ids", Utils.listToText(source.getAppIds()))
+                    .field("url_filters", Utils.listToText(source.getUrlFilters()))
+                    .field("url_normalizers", Utils.listToText(source.getUrlNormalizers()))
+                    .field("title_selectors", Utils.listToText(source.getTitleSelectors()))
+                    .field("text_selectors", Utils.listToText(source.getTextSelectors()))
+                    .field("text_normalizers", Utils.listToText(source.getTextNormalizers()))
+                    .field("date_selectors", Utils.listToText(source.getDateSelectors()))
+                    .field("date_regexps", Utils.listToText(source.getDateRegexps()))
+                    .field("date_formats", Utils.listToText(source.getDateFormats()))
+                    .field("updated", new Date())
+                    .endObject();
+            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(url))
+                    .source(xContentBuilder);
+            getConnection().getRestHighLevelClient().index(indexRequest);
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source with url '{}'", source.getUrl());
         }
@@ -174,35 +212,43 @@ public class EsHttpSourceOperations extends BaseElasticOps {
 
     public void delete(String url) {
         if (url != null) {
-            getConnection().getClient().prepareDelete(getIndex(), getType(), url.toLowerCase()).get();
+            try {
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url));
+                getConnection().getRestHighLevelClient().delete(deleteRequest);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void deleteAll() {
-        Client client = getConnection().getClient();
-
-        TimeValue keepAlive = TimeValue.timeValueMinutes(10);
-        SearchResponse response = client.prepareSearch(getIndex())
-                .setTypes(getType())
-                .setPostFilter(QueryBuilders.matchAllQuery())
-                .setSize(100)
-                .setScroll(keepAlive)
-                .setFetchSource(true)
-                .setExplain(false)
-                .execute()
-                .actionGet();
-        do {
-           Arrays.stream(response.getHits().getHits())
-                    .map(SearchHit::getSourceAsMap)
-                    .filter(Objects::nonNull)
-                    .map(this::mapToHttpSource)
-                    .map(HttpSource::getUrl)
-                    .forEach(this::delete);
-            response = client.prepareSearchScroll(response.getScrollId())
-                    .setScroll(keepAlive)
-                    .execute()
-                    .actionGet();
-        } while (response.getHits().getHits().length != 0);
+        try {
+            TimeValue keepAlive = TimeValue.timeValueMinutes(10);
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                    .query(QueryBuilders.matchAllQuery())
+                    .size(100)
+                    .fetchSource(true)
+                    .explain(false);
+            SearchRequest searchRequest = new SearchRequest(getIndex())
+                    .types(getType())
+                    .scroll(keepAlive)
+                    .source(searchSourceBuilder);
+            SearchResponse response = getConnection().getRestHighLevelClient()
+                    .search(searchRequest);
+            do {
+                Arrays.stream(response.getHits().getHits())
+                        .map(SearchHit::getSourceAsMap)
+                        .filter(Objects::nonNull)
+                        .map(this::mapToHttpSource)
+                        .map(HttpSource::getUrl)
+                        .forEach(this::delete);
+                SearchScrollRequest searchScrollRequest = new SearchScrollRequest(response.getScrollId())
+                        .scroll(keepAlive);
+                response = getConnection().getRestHighLevelClient().searchScroll(searchScrollRequest);
+            } while (response.getHits().getHits().length != 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private HttpSource mapToHttpSource(Map<String, Object> source) {
