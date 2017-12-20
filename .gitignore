@@ -5,3 +5,6 @@ target/
 
 **/*.gwt.xml
 crawler/logs/
+**/.classpath
+**/.project
+**/.settings
