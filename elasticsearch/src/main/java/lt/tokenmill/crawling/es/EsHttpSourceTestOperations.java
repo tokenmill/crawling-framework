@@ -129,7 +129,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
     }
 
     public void save(HttpSourceTest hst) {
-        try {   
+        try {
             String url = hst.getUrl();
             XContentBuilder contentBuilder = jsonBuilder()
                     .startObject()

@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-import lt.tokenmill.crawling.analysisui.search.ResultPanel;
 import lt.tokenmill.crawling.commonui.ElasticSearch;
 import lt.tokenmill.crawling.data.HighlightedSearchResult;
 import lt.tokenmill.crawling.data.NamedQuery;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.vaadin.server.Sizeable.Unit.PERCENTAGE;
 
