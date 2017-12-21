@@ -21,7 +21,7 @@
           "doc_values": true
         },
         "published": {
-          "type": "keyword",
+          "type": "date",
           "doc_values": true
         },
         "url": {
