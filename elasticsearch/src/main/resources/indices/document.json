@@ -94,6 +94,10 @@
           "type": "keyword",
           "doc_values": true
         },
+        "categories": {
+          "type": "keyword",
+          "doc_values": true
+        },
         "title": {
           "type": "text",
           "index": true,
