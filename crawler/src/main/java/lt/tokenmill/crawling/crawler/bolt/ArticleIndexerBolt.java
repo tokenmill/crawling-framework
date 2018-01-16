@@ -29,6 +29,7 @@ import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,13 +104,15 @@ public class ArticleIndexerBolt extends BaseRichBolt {
         } else {
             try {
                 LOG.info("Analyzing url '{}'", url);
-                HttpArticle article = analyze(url, filtered, httpSource, new String(content, charset), metadata);
+                String html = new String(content, charset);
+                HttpArticle article = analyze(url, filtered, httpSource, html, metadata);
                 if (Strings.isNullOrEmpty(article.getTitle()) || Strings.isNullOrEmpty(article.getText()) || article.getPublished() == null) {
                     LOG.warn("Url '{}' analysis returned incomplete data", url);
                     eventCounter.scope("analysis_incomplete").incr();
                     collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.ERROR));
                 } else {
-                    storeDocument(article, Maps.newHashMap());
+                    Map<String, Object> fields = extractFields(url, filtered, httpSource, html, metadata);
+                    storeDocument(article, fields);
                     LOG.info("Stored article '{}'", url);
                     eventCounter.scope("analysis_success").incr();
                     collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.FETCHED));
@@ -122,6 +125,10 @@ public class ArticleIndexerBolt extends BaseRichBolt {
             }
         }
         collector.ack(tuple);
+    }
+
+    protected Map<String, Object> extractFields(String url, String filtered, HttpSource httpSource, String html, Metadata metadata) {
+        return Maps.newHashMap();
     }
 
     protected void storeDocument(HttpArticle article, Map<String, Object> fields) throws Exception {
