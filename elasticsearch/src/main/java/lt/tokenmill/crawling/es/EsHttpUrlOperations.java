@@ -19,6 +19,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
 
     protected EsHttpUrlOperations(ElasticConnection connection, String index, String type) {
         super(connection, index, type);
-        LOG.info("Created ES URLs Operations {}/{}", index, type);
+        LOG.info("Created ES URLs Operations for index='{}', type='{}'", index, type);
     }
 
     public static EsHttpUrlOperations getInstance(ElasticConnection connection, String index, String type) {
@@ -138,7 +139,8 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
-            InternalDateHistogram hits = response.getAggregations().get("urls_over_time");
+//            InternalDateHistogram hits = response.getAggregations().get("urls_over_time");
+            ParsedDateHistogram hits = response.getAggregations().get("urls_over_time");
             return hits.getBuckets().stream()
                     .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))
                     .collect(Collectors.toList());

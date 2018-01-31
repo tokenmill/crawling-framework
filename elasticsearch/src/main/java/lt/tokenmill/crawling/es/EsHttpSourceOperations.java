@@ -44,7 +44,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
 
     protected EsHttpSourceOperations(ElasticConnection connection, String index, String type) {
         super(connection, index, type);
-        LOG.info("Created ES HTTP Sources Operations {}/{}", index, type);
+        LOG.info("Created ES HTTP Sources Operations for index='{}', type='{}'", index, type);
     }
 
     public static EsHttpSourceOperations getInstance(ElasticConnection connection, String index, String type) {

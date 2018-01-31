@@ -130,7 +130,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
 
     public void save(HttpSourceTest hst) {
         try {
-            String url = formatId(hst.getUrl());
+            String url = hst.getUrl();
             XContentBuilder contentBuilder = jsonBuilder()
                     .startObject()
                     .field("url", url)
@@ -142,7 +142,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                     .field("date", hst.getDate() != null ? hst.getDate().trim() : null)
                     .field("updated", new Date())
                     .endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), url)
+            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(hst.getUrl()))
                     .source(contentBuilder);
             getConnection().getRestHighLevelClient().index(indexRequest);
         } catch (IOException e) {

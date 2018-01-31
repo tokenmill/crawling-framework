@@ -160,7 +160,8 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .field("advanced", nq.getAdvanced())
                     .field("updated", new Date())
                     .endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex()).source(contentBuilder);
+            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(nq.getName()))
+                    .source(contentBuilder);
             getConnection().getRestHighLevelClient().index(indexRequest);
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source test with url '{}'", nq.getName());

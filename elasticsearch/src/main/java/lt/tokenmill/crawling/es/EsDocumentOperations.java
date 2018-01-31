@@ -6,8 +6,10 @@ import com.google.common.collect.Sets;
 import lt.tokenmill.crawling.data.*;
 import lt.tokenmill.crawling.es.model.DateHistogramValue;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -20,8 +22,9 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
@@ -172,18 +175,37 @@ public class EsDocumentOperations extends BaseElasticOps {
         }
     }
 
-    public void store(HttpArticle article) throws IOException {
+    public void store(HttpArticle article) {
         store(article, Collections.emptyMap());
     }
 
-    public void store(HttpArticle article, Map<String, Object> fields) throws IOException {
-        XContentBuilder jsonBuilder = jsonBuilder();
-        jsonBuilder.startObject();
-        applyFields(jsonBuilder, article, fields);
-        jsonBuilder.endObject();
-        IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(article.getUrl()))
-                .source(jsonBuilder);
-        getConnection().getProcessor().add(indexRequest);
+    public void store(HttpArticle article, Map<String, Object> fields) {
+        try {
+            XContentBuilder jsonBuilder = jsonBuilder();
+            jsonBuilder.startObject();
+            applyFields(jsonBuilder, article, fields);
+            jsonBuilder.endObject();
+            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(article.getUrl()))
+                    .source(jsonBuilder);
+            getConnection().getProcessor().add(indexRequest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public HttpArticle get(String url) {
+        try {
+            GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
+                    .fetchSourceContext(new FetchSourceContext(true));
+            GetResponse response = getConnection().getRestHighLevelClient().get(getRequest);
+            if (response.isExists()) {
+                return mapToHttpArticle(response.getSource());
+            }
+        } catch (ElasticsearchStatusException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public List<DateHistogramValue> calculateStats(String sourceUrl) {
@@ -207,7 +229,7 @@ public class EsDocumentOperations extends BaseElasticOps {
                             .size(0));
             SearchResponse response = getConnection().getRestHighLevelClient()
                     .search(searchRequest);
-            InternalDateHistogram hits = response.getAggregations().get("urls_over_time");
+            ParsedDateHistogram hits = response.getAggregations().get("urls_over_time");
             return hits.getBuckets().stream()
                     .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))
                     .collect(Collectors.toList());

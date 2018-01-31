@@ -2,6 +2,9 @@
   "settings": {
     "number_of_shards": 1,
     "number_of_replicas": 0,
+    "index": {
+      "codec": "best_compression"
+    },
     "analysis": {
       "filter": {
         "english_stop": {
@@ -91,6 +94,10 @@
           "type": "keyword",
           "doc_values": true
         },
+        "categories": {
+          "type": "keyword",
+          "doc_values": true
+        },
         "title": {
           "type": "text",
           "index": true,
@@ -143,47 +150,6 @@
               "analyzer": "english_nostem_ci"
             }
           }
-        }
-      }
-    },
-    "event": {
-      "_parent": {
-        "type": "doc"
-      },
-      "_source": {
-        "enabled": true
-      },
-      "properties": {
-        "threat": {
-          "type": "keyword",
-          "doc_values": true
-        },
-        "attack": {
-          "type": "keyword",
-          "doc_values": true
-        },
-        "vector": {
-          "type": "keyword",
-          "doc_values": true
-        },
-        "objecttype": {
-          "type": "keyword",
-          "doc_values": true
-        },
-        "target": {
-          "type": "keyword",
-          "doc_values": true
-        },
-        "created": {
-          "type": "date",
-          "doc_values": true
-        },
-        "published": {
-          "type": "date",
-          "doc_values": true
-        },
-        "geo_location": {
-          "type": "geo_point"
         }
       }
     }

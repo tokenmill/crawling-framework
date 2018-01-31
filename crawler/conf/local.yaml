@@ -51,7 +51,7 @@ topology.debug: false
 
 # ElasticSearch configuration
 es.hostname: "localhost"
-es.transport.port: 9300
+es.rest.port: 9200
 
 es.urls.index.name: "urls"
 es.urls.doc.type: "url"

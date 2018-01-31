@@ -1,7 +1,10 @@
 {
   "settings": {
     "number_of_shards": 1,
-    "number_of_replicas": 0
+    "number_of_replicas": 0,
+    "index": {
+      "codec": "best_compression"
+    }
   },
   "mappings": {
     "named_query": {
@@ -11,35 +14,28 @@
       "properties": {
         "updated": {
           "type": "date",
-          "format": "date_optional_time",
-          "index": "not_analyzed"
+          "format": "date_optional_time"
         },
         "name": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "name_suggest": {
-            "type": "completion"
+          "type": "completion"
         },
         "stemmed_case_sensitive": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "stemmed_case_insensitive": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "not_stemmed_case_sensitive": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "not_stemmed_case_insensitive": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "advanced": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         }
       }
     }

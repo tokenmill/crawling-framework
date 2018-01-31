@@ -5,7 +5,7 @@
     <groupId>lt.tokenmill.crawling</groupId>
     <artifactId>crawling-framework</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <name>Crawling Framework</name>
     <description>Framework to simplify news crawling</description>
     <url>https://github.com/tokenmill/crawling-framework</url>
