@@ -22,4 +22,6 @@ public class CrawlerConstants {
     public static final String META_FEED_PUBLISHED = "feed.publishedDate";
 
     public static final String URL_FILTERS_FILE = "urlfilters.config.file";
+
+    public static final String PARTIAL_ANALYSIS_STATUS = "PARTIAL_ANALYSIS";
 }

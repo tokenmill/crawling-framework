@@ -29,12 +29,12 @@ import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.digitalpebble.stormcrawler.Constants.StatusStreamName;
+import static lt.tokenmill.crawling.crawler.CrawlerConstants.PARTIAL_ANALYSIS_STATUS;
 
 
 public class ArticleIndexerBolt extends BaseRichBolt {
@@ -109,7 +109,7 @@ public class ArticleIndexerBolt extends BaseRichBolt {
                 if (Strings.isNullOrEmpty(article.getTitle()) || Strings.isNullOrEmpty(article.getText()) || article.getPublished() == null) {
                     LOG.warn("Url '{}' analysis returned incomplete data", url);
                     eventCounter.scope("analysis_incomplete").incr();
-                    collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.ERROR));
+                    collector.emit(StatusStreamName, tuple, new Values(url, metadata, PARTIAL_ANALYSIS_STATUS));
                 } else {
                     Map<String, Object> fields = extractFields(url, filtered, httpSource, html, metadata);
                     storeDocument(article, fields);
