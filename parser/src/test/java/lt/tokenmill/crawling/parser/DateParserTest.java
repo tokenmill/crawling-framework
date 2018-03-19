@@ -56,6 +56,15 @@ public class DateParserTest {
         return DataUtils.formatInUTC(parse.getDate());
     }
 
+    @Test
+    public void parseWithTimewords() {
+        MatchedDate matchedDate = new MatchedDate("Wed Feb 24 2016 00:01 UTC+1201", null);
+        MatchedDate parse = DateParser.parse(matchedDate, new HttpSource());
+        assertEquals("2016-02-24T00:01:00", DataUtils.formatInUTC(parse.getDate()));
+        assertEquals("TIMEWORDS", parse.getPattern());
+        assertEquals("Wed Feb 24 2016 00:01 UTC+1201", parse.getValue());
+    }
+
     private Date simpleParse(String dateString, String dateFormat) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat(dateFormat);
         format.setTimeZone(TimeZone.getTimeZone("GMT"));

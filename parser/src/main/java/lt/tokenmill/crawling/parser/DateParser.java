@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lt.tokenmill.crawling.data.HttpSource;
 import lt.tokenmill.crawling.parser.data.MatchedDate;
+import lt.tokenmill.timewords.Timewords;
 import org.joda.time.DateTime;
 import org.jsoup.nodes.Document;
 
@@ -52,6 +53,20 @@ public class DateParser {
         FORMATTERS = formatsToFormatters(FORMATS);
     }
 
+    private static MatchedDate parseWithTimewords(MatchedDate matchedText, HttpSource source) {
+        Timewords timewords = new Timewords();
+        try {
+            Date parse = timewords.parse(matchedText.getValue(), new Date(), source.getLanguage());
+            if (parse != null) {
+                matchedText.setDate(new DateTime(parse));
+                matchedText.setPattern("TIMEWORDS");
+            }
+            return matchedText;
+        } catch (Exception e) {
+            return matchedText;
+        }
+    }
+
     public static MatchedDate parse(MatchedDate matchedText, HttpSource source) {
         String value = Strings.nullToEmpty(matchedText.getValue()).trim();
         for (String regexp : source.getDateRegexps()) {
@@ -63,17 +78,15 @@ public class DateParser {
         }
         matchedText.setValue(value.replace("ET", "EST"));
         List<SimpleDateFormat> customFormatters = formatsToFormatters(source.getDateFormats());
-        return Stream.concat(customFormatters.stream(), FORMATTERS.stream())
-                .map(dateFormat -> parse(matchedText, dateFormat))
-                .filter(d -> d.getDate() != null)
-                .findFirst().orElse(matchedText);
-    }
 
-    private static SimpleDateFormat createFormatter(String format) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-        formatter.setLenient(false);
-        return formatter;
+        MatchedDate md = Stream.concat(customFormatters.stream(), FORMATTERS.stream())
+                .map(dateFormat -> parse(matchedText, dateFormat))
+                .filter(matchedDate -> matchedDate.getDate() != null)
+                .findFirst().orElse(matchedText);
+        if (md.getDate() == null && md.getValue() != null) {
+            md = parseWithTimewords(md, source);
+        }
+        return md;
     }
 
     private static MatchedDate parse(MatchedDate matchedText, SimpleDateFormat format) {
@@ -85,6 +98,13 @@ public class DateParser {
         } catch (Exception e) {
             return matchedText;
         }
+    }
+
+    private static SimpleDateFormat createFormatter(String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        formatter.setLenient(false);
+        return formatter;
     }
 
     private static final List<String> DATE_META_KEYS = Lists.newArrayList(

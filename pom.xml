@@ -5,7 +5,7 @@
     <groupId>lt.tokenmill.crawling</groupId>
     <artifactId>crawling-framework</artifactId>
     <packaging>pom</packaging>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
     <name>Crawling Framework</name>
     <description>Framework to simplify news crawling</description>
     <url>https://github.com/tokenmill/crawling-framework</url>
@@ -138,6 +138,7 @@
         <slf4j.version>1.7.12</slf4j.version>
         <jsoup.version>1.10.3</jsoup.version>
         <jsonld.version>0.11.0</jsonld.version>
+        <timewords.version>0.4.0</timewords.version>
     </properties>
 
     <modules>
@@ -232,6 +233,10 @@
         <repository>
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
+        </repository>
+        <repository>
+            <id>clojars.org</id>
+            <url>https://repo.clojars.org</url>
         </repository>
     </repositories>
 
