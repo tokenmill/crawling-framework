@@ -45,6 +45,10 @@ public class EsHttpUrlOperations extends BaseElasticOps{
     }
 
     public void upsertUrlStatus(String url, String published, String source, boolean create, Enum status) throws IOException {
+        upsertUrlStatus(url, published, source, create, String.valueOf(status));
+    }
+
+    public void upsertUrlStatus(String url, String published, String source, boolean create, String status) throws IOException {
         try {
             Date now = new Date();
             String id = formatId(url);
@@ -55,7 +59,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                     .field("created", now)
                     .field("updated", now)
                     .field("published", published)
-                    .field("status", String.valueOf(status))
+                    .field("status", status)
                     .endObject();
             IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), id)
                     .source(insert)
@@ -68,7 +72,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                         .startObject()
                         .field("updated", now)
                         .field("published", published)
-                        .field("status", String.valueOf(status))
+                        .field("status", status)
                         .endObject();
                 UpdateRequest upsert = new UpdateRequest(getIndex(), getType(), id)
                         .doc(update)

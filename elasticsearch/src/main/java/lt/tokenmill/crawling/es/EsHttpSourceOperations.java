@@ -99,10 +99,14 @@ public class EsHttpSourceOperations extends BaseElasticOps {
         try {
             BoolQueryBuilder filter = QueryBuilders.boolQuery();
             if (!Strings.isNullOrEmpty(text)) {
-                filter.must(QueryBuilders
+                filter.should(QueryBuilders
                         .queryStringQuery(QueryParser.escape(text.trim()))
                         .field("search_field")
                         .defaultOperator(Operator.AND));
+                filter.should(QueryBuilders
+                        .prefixQuery("search_field", QueryParser.escape(text.trim())));
+                filter.should(QueryBuilders
+                        .prefixQuery("search_field", "www." + text));
             }
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
