@@ -109,7 +109,7 @@ public class ArticleIndexerBolt extends BaseRichBolt {
                 if (Strings.isNullOrEmpty(article.getTitle()) || Strings.isNullOrEmpty(article.getText()) || article.getPublished() == null) {
                     LOG.warn("Url '{}' analysis returned incomplete data", url);
                     eventCounter.scope("analysis_incomplete").incr();
-                    collector.emit(StatusStreamName, tuple, new Values(url, metadata, PARTIAL_ANALYSIS_STATUS));
+                    collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.ERROR));
                 } else {
                     Map<String, Object> fields = extractFields(url, filtered, httpSource, html, metadata);
                     storeDocument(article, fields);

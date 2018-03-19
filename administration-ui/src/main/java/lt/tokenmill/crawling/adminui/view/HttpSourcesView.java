@@ -30,6 +30,9 @@ public class HttpSourcesView extends BaseView {
     private Grid itemsGrid = new Grid(new GeneratedPropertyContainer(new BeanItemContainer<>(HttpSource.class)));
     private Label totalCountLabel = new Label();
     private TextField filterField = new TextField();
+    private HorizontalLayout pagingRow = new HorizontalLayout();;
+    private long totalCount = 0;
+    private int currentPage = 1;
 
     public HttpSourcesView() {
         super("HTTP Sources");
@@ -55,7 +58,10 @@ public class HttpSourcesView extends BaseView {
 
         // Search field and create new button
         filterField.setInputPrompt("Enter search text...");
-        filterField.addTextChangeListener(event -> refreshGrid(event.getText()));
+        filterField.addTextChangeListener(event -> {
+            this.currentPage = 1;
+            refreshGrid(event.getText());
+        });
         Button addNewButton = new Button("Add New (Alt + N)");
         addNewButton.addClickListener(event -> form.edit(new HttpSource()));
         addShortcutListener(new Button.ClickShortcut(addNewButton, ShortcutAction.KeyCode.N, ShortcutAction.ModifierKey.ALT));
@@ -99,16 +105,44 @@ public class HttpSourcesView extends BaseView {
         mainLayout.addComponent(form);
         mainLayout.setExpandRatio(form, 0.45f);
         addComponent(mainLayout);
+        gridLayout.addComponent(pagingRow);
+    }
+
+    private void refreshPagingRow() {
+        pagingRow.removeAllComponents();
+        pagingRow.addComponent(new Label("Pages: "));
+        long amountOfPages = this.totalCount / 100;
+        amountOfPages = amountOfPages + (this.totalCount % 100 != 0 ? 1 : 0);
+        for (int i = 1; i <= amountOfPages; i++) {
+            String buttonLabel = String.valueOf(i);
+            Button button = new Button();
+            if (i == currentPage) {
+                buttonLabel = ">>" + buttonLabel + "<<";
+            }
+            button.setCaption(buttonLabel);
+            button.setIconAlternateText(String.valueOf(i));
+            button.addClickListener(clickEvent -> {
+                this.currentPage = (Integer.parseInt(clickEvent.getButton().getIconAlternateText()));
+                refreshGrid(filterField.getValue());
+            });
+            pagingRow.addComponent(button);
+        }
+    }
+
+    private int getOffset() {
+        return (this.currentPage - 1) * 100;
     }
 
     private void refreshGrid(String text) {
         LOG.info("Refreshing grid using filter '{}'", text);
-        PageableList<HttpSource> data = ElasticSearch.getHttpSourceOperations().filter(text);
+        PageableList<HttpSource> data = ElasticSearch.getHttpSourceOperations().filter(text, getOffset());
         itemsGrid.getContainerDataSource().removeAllItems();
         for (HttpSource source : data.getItems()) {
             itemsGrid.getContainerDataSource().addItem(source);
         }
+        this.totalCount = data.getTotalCount();
         totalCountLabel.setValue(String.format("Total count: %d", data.getTotalCount()));
+        refreshPagingRow();
     }
 
     private static class StringListConverter implements Converter<String, List> {
