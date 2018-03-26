@@ -138,7 +138,7 @@
         <slf4j.version>1.7.12</slf4j.version>
         <jsoup.version>1.10.3</jsoup.version>
         <jsonld.version>0.11.0</jsonld.version>
-        <timewords.version>0.4.0</timewords.version>
+        <timewords.version>0.5.0-SNAPSHOT</timewords.version>
     </properties>
 
     <modules>
