@@ -2,6 +2,7 @@ package lt.tokenmill.crawling.adminui.view;
 
 import com.google.common.base.Joiner;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
@@ -13,6 +14,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import lt.tokenmill.crawling.commonui.ElasticSearch;
 import lt.tokenmill.crawling.data.HttpSource;
 import lt.tokenmill.crawling.data.PageableList;
+import lt.tokenmill.crawling.es.model.DateHistogramValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,8 @@ public class HttpSourcesView extends BaseView {
     private Grid itemsGrid = new Grid(new GeneratedPropertyContainer(new BeanItemContainer<>(HttpSource.class)));
     private Label totalCountLabel = new Label();
     private TextField filterField = new TextField();
-    private HorizontalLayout pagingRow = new HorizontalLayout();;
+    private HorizontalLayout pagingRow = new HorizontalLayout();
+    ;
     private long totalCount = 0;
     private int currentPage = 1;
 
@@ -50,7 +53,8 @@ public class HttpSourcesView extends BaseView {
             public void afterUpdate() {
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) {
+                }
                 refreshGrid(filterField.getValue());
             }
         };
@@ -82,14 +86,17 @@ public class HttpSourcesView extends BaseView {
         itemsGrid.getColumn("name").setConverter(new StringTrimmer(50));
         itemsGrid.getColumn("url").setRenderer(new HtmlRenderer(), new UrlToLinkConverter());
         itemsGrid.getColumn("enabled");
-        ((GeneratedPropertyContainer)itemsGrid.getContainerDataSource())
+
+
+        ((GeneratedPropertyContainer) itemsGrid.getContainerDataSource())
                 .addGeneratedProperty("test", new ButtonPropertyGenerator("Test"));
-        ((GeneratedPropertyContainer)itemsGrid.getContainerDataSource())
-                .addGeneratedProperty("statistics", new ButtonPropertyGenerator("Stats"));
+        ((GeneratedPropertyContainer) itemsGrid.getContainerDataSource())
+                .addGeneratedProperty("statistics", new StatsButtonPropertyGenerator("Stats"));
         itemsGrid.getColumn("test").setRenderer(new ButtonRenderer(e -> {
             HttpSource hs = (HttpSource) e.getItemId();
             hs = ElasticSearch.getHttpSourceOperations().get(hs.getUrl());
             UI.getCurrent().addWindow(new HttpSourceTestWindow(hs));
+
         }));
         itemsGrid.getColumn("statistics").setRenderer(new ButtonRenderer(e -> {
             HttpSource hs = (HttpSource) e.getItemId();
@@ -215,6 +222,34 @@ public class HttpSourcesView extends BaseView {
 
         @Override
         public Class<String> getPresentationType() {
+            return String.class;
+        }
+    }
+
+    private static class StatsButtonPropertyGenerator extends PropertyValueGenerator<String> {
+
+
+        private String name;
+
+        public StatsButtonPropertyGenerator(String name) {
+            this.name = name;
+        }
+
+        private Long lastHistogramValue(List<DateHistogramValue> coll) {
+            return coll.size() == 0 ? 0 : coll.get(coll.size() - 1).getValue();
+        }
+
+        @Override
+        public String getValue(Item item, Object itemId, Object propertyId) {
+            HttpSource hs = (HttpSource) itemId;
+            List<DateHistogramValue> urls = ElasticSearch.getUrlOperations().calculateStats(hs.getUrl());
+            List<DateHistogramValue> documents = ElasticSearch.getDocumentOperations().calculateStats(hs.getUrl());
+
+            return String.format("%s (%4d/%4d)", name, lastHistogramValue(urls), lastHistogramValue(documents));
+        }
+
+        @Override
+        public Class<String> getType() {
             return String.class;
         }
     }
