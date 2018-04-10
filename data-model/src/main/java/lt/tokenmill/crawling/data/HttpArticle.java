@@ -9,6 +9,8 @@ public class HttpArticle {
 
     private String source;
 
+    private String language;
+
     private String url;
 
     private String title;
@@ -85,5 +87,13 @@ public class HttpArticle {
 
     public void setCategories(List<String> categories) {
         this.categories = categories;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

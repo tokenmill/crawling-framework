@@ -42,6 +42,7 @@ public class EsDocumentOperations extends BaseElasticOps {
     private static final Logger LOG = LoggerFactory.getLogger(EsDocumentOperations.class);
 
     public static final String URL_FIELD = "url";
+    public static final String LANGUAGE_FIELD = "language";
     public static final String SOURCE_FIELD = "source";
     public static final String CREATED_FIELD = "created";
     public static final String UPDATED_FIELD = "updated";
@@ -54,7 +55,7 @@ public class EsDocumentOperations extends BaseElasticOps {
     public static final String CATEGORIES_FIELD = "categories";
 
     private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(
-            URL_FIELD, SOURCE_FIELD, CREATED_FIELD, UPDATED_FIELD,
+            URL_FIELD, LANGUAGE_FIELD, SOURCE_FIELD, CREATED_FIELD, UPDATED_FIELD,
             PUBLISHED_FIELD, DISCOVERED_FIELD, TITLE_FIELD, TEXT_FIELD,
             STATUS_FIELD, APP_IDS_FIELD, CATEGORIES_FIELD);
 
@@ -250,6 +251,7 @@ public class EsDocumentOperations extends BaseElasticOps {
     private void applyFields(XContentBuilder builder, HttpArticle article, Map<String, Object> fields) throws IOException {
         applyField(builder, URL_FIELD, fields, article.getUrl());
         applyField(builder, SOURCE_FIELD, fields, article.getSource());
+        applyField(builder, LANGUAGE_FIELD, fields, article.getLanguage());
         applyField(builder, CREATED_FIELD, fields, new Date());
         applyField(builder, UPDATED_FIELD, fields, new Date());
         applyField(builder, PUBLISHED_FIELD, fields, article.getPublished());
@@ -277,10 +279,10 @@ public class EsDocumentOperations extends BaseElasticOps {
         return new HighlightedSearchResult(article, highlights);
     }
 
-
     protected HttpArticle mapToHttpArticle(Map<String, Object> source) {
         HttpArticle ha = new HttpArticle();
         ha.setUrl(Objects.toString(source.get("url"), null));
+        ha.setLanguage(Objects.toString(source.get("language"), null));
         ha.setSource(Objects.toString(source.get("source"), null));
         ha.setTitle(Objects.toString(source.get("title"), null));
         ha.setText(Objects.toString(source.get("text"), null));
