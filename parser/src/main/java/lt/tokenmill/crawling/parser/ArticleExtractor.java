@@ -28,6 +28,7 @@ public class ArticleExtractor {
         HttpArticle article = new HttpArticle();
         article.setUrl(url);
         article.setSource(source.getUrl());
+        article.setLanguage(source.getLanguage());
         article.setAppIds(source.getAppIds());
         article.setCategories(source.getCategories());
 
