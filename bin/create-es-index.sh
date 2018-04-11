@@ -1,4 +1,4 @@
-# $1 - type of the index (docs, http_sources)
+# $1 - index name (docs, http_sources)
 # $2 - ES index config file name
 # $3 - ES host
 # $4 - application name
