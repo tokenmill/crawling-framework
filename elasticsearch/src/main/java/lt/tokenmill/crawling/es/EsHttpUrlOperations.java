@@ -4,21 +4,17 @@ import lt.tokenmill.crawling.data.HttpUrl;
 import lt.tokenmill.crawling.es.model.DateHistogramValue;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -86,14 +82,17 @@ public class EsHttpUrlOperations extends BaseElasticOps{
     }
 
     public List<HttpUrl> findUrlsByStatusAndSource(Enum status, String source, int count) {
+        return findUrlsByStatusAndSource(String.valueOf(status), source, count);
+    }
+
+    public List<HttpUrl> findUrlsByStatusAndSource(String status, String source, int count) {
         try {
             BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                    .must(QueryBuilders.termQuery("status", String.valueOf(status)))
+                    .must(QueryBuilders.termQuery("status", status))
                     .must(QueryBuilders.termQuery("source", source));
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                     .fetchSource(true)
-                    .explain(false)
                     .size(count)
                     .query(filter)
                     .sort("created", SortOrder.DESC);

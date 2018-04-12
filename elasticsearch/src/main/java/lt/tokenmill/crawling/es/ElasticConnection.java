@@ -6,6 +6,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -95,13 +96,17 @@ public class ElasticConnection {
         @Override
         public void beforeBulk(long executionId, BulkRequest request) {
             for (DocWriteRequest r :request.requests()) {
-                if (r instanceof IndexRequest) {
-                    IndexRequest indexRequest = (IndexRequest) r;
-                    try {
+                try {
+                    if (r instanceof IndexRequest) {
+                        IndexRequest indexRequest = (IndexRequest) r;
                         indexRequest.id(URLDecoder.decode(indexRequest.id(), "utf-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
+
+                    } else if (r instanceof UpdateRequest) {
+                        UpdateRequest updateRequest = (UpdateRequest) r;
+                        updateRequest.id(URLDecoder.decode(updateRequest.id(), "utf-8"));
                     }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
             }
         }

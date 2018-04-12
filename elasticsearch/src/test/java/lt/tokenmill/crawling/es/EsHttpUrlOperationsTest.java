@@ -1,16 +1,15 @@
 package lt.tokenmill.crawling.es;
 
-import lt.tokenmill.crawling.data.HttpSource;
-import org.junit.After;
-import org.junit.Before;
+import lt.tokenmill.crawling.data.HttpUrl;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 public class EsHttpUrlOperationsTest {
 
@@ -19,47 +18,23 @@ public class EsHttpUrlOperationsTest {
     private static final String ES_TEST_HOST = "127.0.0.1";
     private static final int ES_HTTP_TEST_PORT = 9200;
     private static final String ES_REST_TEST_SCHEME = "http";
-    private static final int ES_TRANSPORT_TEST_PORT = 9305;
-    private static final String ES_DATA_DIRECTORY = "target/elasticsearch-data";
-    private static final boolean ES_CLEAN_DATA_DIR = true;
     private static final String INDEX_ALIAS = "demo-urls";
     private static final String DOC_TYPE = "url";
-    private static final String INDEX_CONF_RESOURCE_FILE = "indices/url.json";
 
-//    private ElasticsearchTestServer elasticsearchTestServer;
-//
-//    @Before // setup()
-//    public void before() throws Exception {
-//        LOG.info("Setting ES server up!");
-//        this.elasticsearchTestServer = ElasticsearchTestServer.builder()
-//                .httpPort(ES_HTTP_TEST_PORT)
-//                .transportPort(ES_TRANSPORT_TEST_PORT)
-//                .dataDirectory(ES_DATA_DIRECTORY)
-//                .cleanDataDir(ES_CLEAN_DATA_DIR)
-//                .build();
-//        this.elasticsearchTestServer.start();
-//
-//        String indexConf = TestUtils.readResourceAsString(INDEX_CONF_RESOURCE_FILE);
-//        new IndexManager(ES_TEST_HOST, ES_HTTP_TEST_PORT).prepare(INDEX_ALIAS, indexConf, true);
-//    }
-//
-//    @After
-//    public void after() throws Exception {
-//        LOG.info("Tearing ES server down.");
-//        this.elasticsearchTestServer.stop();
-//    }
 
     @Test
     @Ignore
-    public void testEsHttpSourceOperations000() throws IOException {
+    public void testEsHttpSourceOperations000() throws IOException, InterruptedException {
         ElasticConnection connection = ElasticConnection.getConnection(ES_TEST_HOST, ES_HTTP_TEST_PORT, ES_REST_TEST_SCHEME);
-
-        EsHttpSourceOperations esHttpSourceOperations = EsHttpSourceOperations.getInstance(connection, INDEX_ALIAS, DOC_TYPE);
         EsHttpUrlOperations esHttpUrlOperations = EsHttpUrlOperations.getInstance(connection, INDEX_ALIAS, DOC_TYPE);
 
-        System.out.println(">>>" + esHttpUrlOperations.calculateStats("www.bbc.com"));
-
-//        esHttpSourceOperations.save(source);
-//        assertEquals(1, esHttpSourceOperations.all().size());
+        String url = "http://www.bbc.com/news/science-environment-43727547";
+        String source = "www.bbc.com";
+        esHttpUrlOperations.upsertUrlStatus(url, null, source, true, "a");
+        Thread.sleep(6000);
+        esHttpUrlOperations.upsertUrlStatus(url, null, source, false, "b");
+        Thread.sleep(6000);
+        List<HttpUrl> urls = esHttpUrlOperations.findUrlsByStatusAndSource("b", source, 10);
+        assertTrue(urls.size() > 0);
     }
 }
