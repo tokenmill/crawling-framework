@@ -96,4 +96,19 @@ public class HttpArticle {
     public void setLanguage(String language) {
         this.language = language;
     }
+
+    @Override
+    public String toString() {
+        return "HttpArticle{" +
+                "source='" + source + '\'' +
+                ", language='" + language + '\'' +
+                ", url='" + url + '\'' +
+                ", title='" + title + '\'' +
+                ", text='" + text + '\'' +
+                ", appIds=" + appIds +
+                ", published=" + published +
+                ", discovered=" + discovered +
+                ", categories=" + categories +
+                '}';
+    }
 }

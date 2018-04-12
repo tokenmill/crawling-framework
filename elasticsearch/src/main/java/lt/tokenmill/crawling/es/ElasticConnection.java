@@ -1,9 +1,11 @@
 package lt.tokenmill.crawling.es;
 
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -12,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class ElasticConnection {
     private static final Logger LOG = LoggerFactory.getLogger(ElasticConnection.class);
@@ -90,6 +94,16 @@ public class ElasticConnection {
 
         @Override
         public void beforeBulk(long executionId, BulkRequest request) {
+            for (DocWriteRequest r :request.requests()) {
+                if (r instanceof IndexRequest) {
+                    IndexRequest indexRequest = (IndexRequest) r;
+                    try {
+                        indexRequest.id(URLDecoder.decode(indexRequest.id(), "utf-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     };
 
