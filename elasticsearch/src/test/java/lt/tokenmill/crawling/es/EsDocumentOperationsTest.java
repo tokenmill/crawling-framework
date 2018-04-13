@@ -1,9 +1,12 @@
 package lt.tokenmill.crawling.es;
 
+import com.google.common.collect.ImmutableMap;
 import lt.tokenmill.crawling.data.HttpArticle;
 import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,5 +30,11 @@ public class EsDocumentOperationsTest {
         HttpArticle httpArticle = esDocumentOperations.get(article.getUrl());
         assertEquals(article.getUrl(), httpArticle.getUrl());
         assertEquals(article.getText(), httpArticle.getText());
+
+        esDocumentOperations.update(article, ImmutableMap.of("TESTKEY", "TESTVAL"));
+        Thread.sleep(6000);
+        Map<String, Object> articleMap = esDocumentOperations.getAsMap(article.getUrl());
+        assertEquals(article.getText(), articleMap.get("text"));
+        assertEquals("TESTVAL", articleMap.get("TESTKEY"));
     }
 }

@@ -13,6 +13,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -194,13 +196,41 @@ public class EsDocumentOperations extends BaseElasticOps {
         }
     }
 
+    public void update(HttpArticle article, Map<String, Object> fields) {
+        try {
+            Date now = new Date();
+            String id = formatId(article.getUrl());
+
+            XContentBuilder  update = jsonBuilder().startObject();
+            update.field("updated", now);
+            for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                update.field(entry.getKey(), entry.getValue());
+            }
+            update = update.endObject();
+
+            XContentBuilder upsertDoc = jsonBuilder().startObject();
+            applyFields(upsertDoc, article, fields);
+            upsertDoc.endObject();
+            UpdateRequest upsert = new UpdateRequest(getIndex(), getType(), id)
+                    .doc(update)
+                    .upsert(upsertDoc);
+            getConnection().getProcessor().add(upsert);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public HttpArticle get(String url) {
+        return mapToHttpArticle(getAsMap(url));
+    }
+
+    public Map<String, Object> getAsMap(String url) {
         try {
             GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
             GetResponse response = getConnection().getRestHighLevelClient().get(getRequest);
             if (response.isExists()) {
-                return mapToHttpArticle(response.getSource());
+                return response.getSource();
             }
         } catch (ElasticsearchStatusException e) {
         } catch (Exception e) {
