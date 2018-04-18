@@ -2,6 +2,7 @@ package lt.tokenmill.crawling.es;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -87,10 +88,16 @@ public class ElasticConnection {
 
         @Override
         public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+            for (BulkItemResponse item : response.getItems()) {
+                if (item.isFailed()) {
+                    LOG.error("Bulk item failure: {}", item.getFailure());
+                }
+            }
         }
 
         @Override
         public void afterBulk(long executionId, BulkRequest request, Throwable response) {
+            LOG.error("Bulk failed:" + response);
         }
 
         @Override
