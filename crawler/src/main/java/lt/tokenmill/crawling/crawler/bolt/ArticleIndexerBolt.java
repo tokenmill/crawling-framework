@@ -30,11 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.digitalpebble.stormcrawler.Constants.StatusStreamName;
-import static lt.tokenmill.crawling.crawler.CrawlerConstants.PARTIAL_ANALYSIS_STATUS;
 
 
 public class ArticleIndexerBolt extends BaseRichBolt {
@@ -135,17 +132,10 @@ public class ArticleIndexerBolt extends BaseRichBolt {
         this.esDocumentOperations.store(article, fields);
     }
 
-    private Pattern dateInUrl = Pattern.compile(".*(\\d{4}/\\d{2}/\\d{2}).*");
     private HttpArticle analyze(String url, String filtered, HttpSource httpSource, String html, Metadata metadata) throws Exception {
         String publishedHint = metadata.getFirstValue(CrawlerConstants.META_PUBLISHED);
         if (publishedHint == null) {
             publishedHint = metadata.getFirstValue(CrawlerConstants.META_FEED_PUBLISHED);
-        }
-        if (publishedHint == null) {
-            Matcher matcher = dateInUrl.matcher(url);
-            if (matcher.find()) {
-                publishedHint = matcher.group(1);
-            }
         }
         HttpArticle article = ArticleExtractor.extractArticle(html, filtered, httpSource, publishedHint);
         String discovered = metadata.getFirstValue(CrawlerConstants.META_DISCOVERED);
