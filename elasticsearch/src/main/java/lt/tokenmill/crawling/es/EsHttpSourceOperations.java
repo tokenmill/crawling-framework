@@ -20,6 +20,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -102,6 +103,8 @@ public class EsHttpSourceOperations extends BaseElasticOps {
         try {
             BoolQueryBuilder filter = QueryBuilders.boolQuery();
             if (!Strings.isNullOrEmpty(text)) {
+                filter.should(QueryBuilders.termQuery("url", text));
+                filter.should(QueryBuilders.termQuery("name", text));
                 filter.should(QueryBuilders
                         .queryStringQuery(QueryParser.escape(text.trim()))
                         .field("search_field")
@@ -109,7 +112,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                 filter.should(QueryBuilders
                         .prefixQuery("search_field", QueryParser.escape(text.trim())));
                 filter.should(QueryBuilders
-                        .prefixQuery("search_field", "www." + text));
+                        .prefixQuery("search_field", "www." + QueryParser.escape(text.trim())));
             }
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()

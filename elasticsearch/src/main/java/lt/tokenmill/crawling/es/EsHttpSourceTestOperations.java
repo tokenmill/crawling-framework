@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lt.tokenmill.crawling.data.HttpSourceTest;
 import lt.tokenmill.crawling.data.PageableList;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -18,6 +19,7 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -53,8 +55,14 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
         try {
             BoolQueryBuilder filter = QueryBuilders.boolQuery();
             if (!Strings.isNullOrEmpty(prefix)) {
-                filter.must(QueryBuilders
-                        .prefixQuery("url", prefix.trim()));
+                filter.should(QueryBuilders
+                        .queryStringQuery(QueryParser.escape(prefix.trim()))
+                        .field("search_field")
+                        .defaultOperator(Operator.OR));
+                filter.should(QueryBuilders
+                        .prefixQuery("search_field", QueryParser.escape(prefix.trim())));
+                filter.should(QueryBuilders
+                        .prefixQuery("search_field", "www." + QueryParser.escape(prefix.trim())));
             }
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                     .size(100)

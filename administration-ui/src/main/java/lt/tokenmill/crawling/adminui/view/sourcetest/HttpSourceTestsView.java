@@ -39,7 +39,7 @@ public class HttpSourceTestsView extends BaseView {
 
 
         // Search field and create new button
-        filterField.setInputPrompt("Enter URL...");
+        filterField.setInputPrompt("Search...");
         filterField.addTextChangeListener(event -> refreshGrid(event.getText()));
 
         Button testAllButton = new Button("Run All Tests");

@@ -20,6 +20,7 @@ public class EsHttpSourceOperationsTest {
         }
     }
 
+    @Ignore
     @Test
     public void testRefresh() {
         ElasticConnection connection = ElasticConnection.getConnection("localhost", 9200, "http");
