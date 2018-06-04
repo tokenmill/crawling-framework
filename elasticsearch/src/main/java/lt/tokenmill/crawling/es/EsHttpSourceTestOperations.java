@@ -14,7 +14,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -143,7 +143,8 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                     .field("updated", new Date())
                     .endObject();
             IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(hst.getUrl()))
-                    .source(contentBuilder);
+                    .source(contentBuilder)
+                    .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             getConnection().getRestHighLevelClient().index(indexRequest);
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source test with url '{}'", hst.getUrl());
@@ -154,7 +155,8 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
     public void delete(String url) {
         if (url != null) {
             try {
-                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url));
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url))
+                        .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
                 DeleteResponse delete = getConnection().getRestHighLevelClient().delete(deleteRequest);
                 LOG.debug("Delete HttpSourceTest url {} with response status {}", url, delete.status());
             } catch (IOException e) {

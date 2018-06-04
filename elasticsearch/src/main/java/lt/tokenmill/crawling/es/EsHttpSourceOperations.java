@@ -15,13 +15,12 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -211,7 +210,8 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .field("updated", new Date())
                     .endObject();
             IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(url))
-                    .source(xContentBuilder);
+                    .source(xContentBuilder)
+                    .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             getConnection().getRestHighLevelClient().index(indexRequest);
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source with url '{}'", source.getUrl());
@@ -222,7 +222,8 @@ public class EsHttpSourceOperations extends BaseElasticOps {
     public void delete(String url) {
         if (url != null) {
             try {
-                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url));
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url))
+                        .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
                 getConnection().getRestHighLevelClient().delete(deleteRequest);
             } catch (IOException e) {
                 e.printStackTrace();
