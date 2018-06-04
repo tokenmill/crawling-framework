@@ -2,7 +2,6 @@ package lt.tokenmill.crawling.adminui.view;
 
 import com.google.common.base.Joiner;
 import com.vaadin.data.Item;
-import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
@@ -33,7 +32,6 @@ public class HttpSourcesView extends BaseView {
     private Label totalCountLabel = new Label();
     private TextField filterField = new TextField();
     private HorizontalLayout pagingRow = new HorizontalLayout();
-    ;
     private long totalCount = 0;
     private int currentPage = 1;
 
@@ -51,10 +49,6 @@ public class HttpSourcesView extends BaseView {
         HttpSourceForm form = new HttpSourceForm() {
             @Override
             public void afterUpdate() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                }
                 refreshGrid(filterField.getValue());
             }
         };
