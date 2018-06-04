@@ -7,7 +7,7 @@ Crawling Framework aims at providing instruments to configure and run your [Stor
 1. Specify which elements of the page provide information about article publication name, its title and main body.
 1. Define tests which validate that extraction rules are working.
 
-Once configuration is done Crawling Framework runs [Storm Crawler](http://stormcrawler.net/) based crawling following the rules specified in the configuration.
+Once configuration is done the Crawling Framework runs [Storm Crawler](http://stormcrawler.net/) based crawling following the rules specified in the configuration.
 
 ## Introduction
 

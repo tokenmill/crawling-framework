@@ -12,6 +12,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
@@ -161,7 +162,8 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .field("updated", new Date())
                     .endObject();
             IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(nq.getName()))
-                    .source(contentBuilder);
+                    .source(contentBuilder)
+                    .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             getConnection().getRestHighLevelClient().index(indexRequest);
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source test with url '{}'", nq.getName());
@@ -172,8 +174,9 @@ public class EsNamedQueryOperations extends BaseElasticOps {
     public void delete(NamedQuery nq) {
         if (nq != null && nq.getName() != null) {
             try {
-                getConnection().getRestHighLevelClient()
-                        .delete(new DeleteRequest(getIndex(), getType(), formatId(nq.getName())));
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(nq.getName()))
+                        .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+                getConnection().getRestHighLevelClient().delete(deleteRequest);
             } catch (IOException e) {
                 e.printStackTrace();
             }
