@@ -46,6 +46,10 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
     }
 
     public PageableList<HttpSourceTest> filter(String prefix) {
+        return filter(prefix, 0);
+    }
+
+    public PageableList<HttpSourceTest> filter(String prefix, int offset) {
         try {
             BoolQueryBuilder filter = QueryBuilders.boolQuery();
             if (!Strings.isNullOrEmpty(prefix)) {
@@ -54,6 +58,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
             }
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                     .size(100)
+                    .from(offset)
                     .fetchSource(true)
                     .explain(false)
                     .query(filter);
