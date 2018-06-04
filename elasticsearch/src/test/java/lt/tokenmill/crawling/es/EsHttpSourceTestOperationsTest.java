@@ -1,6 +1,7 @@
 package lt.tokenmill.crawling.es;
 
 import lt.tokenmill.crawling.data.HttpSourceTest;
+import lt.tokenmill.crawling.data.PageableList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -82,6 +83,19 @@ public class EsHttpSourceTestOperationsTest {
         assertEquals(httpSourceTest.getTitle(), fromEs.getTitle());
         assertEquals(httpSourceTest.getText(), fromEs.getText());
         assertEquals(httpSourceTest.getDate(), fromEs.getDate());
+    }
+
+    @Test
+    @Ignore
+    public void testSearch() {
+        ElasticConnection connection = ElasticConnection.getConnection("localhost", 9200, "http");
+        EsHttpSourceTestOperations ops = EsHttpSourceTestOperations.getInstance(connection, "cf-http_source_tests_v1", "http_source_test");
+        System.out.println(">>" + ops.all());
+
+        PageableList<HttpSourceTest> pageableList = ops.filter("re", 0);
+        System.out.println(pageableList.getTotalCount());
+        System.out.println(pageableList.getItems().get(0));
+
     }
 
 }

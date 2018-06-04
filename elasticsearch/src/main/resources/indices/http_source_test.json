@@ -14,20 +14,18 @@
       "properties": {
         "updated": {
           "type": "date",
-          "format": "date_optional_time",
-          "index": false
+          "format": "date_optional_time"
         },
         "source_url": {
           "type": "keyword",
-          "index": false
+          "copy_to": "search_field"
         },
         "url": {
           "type": "keyword",
-          "index": false
+          "copy_to": "search_field"
         },
         "url_accepted": {
           "type": "boolean",
-          "index": false,
           "doc_values": false
         },
         "html": {
@@ -49,6 +47,9 @@
           "type": "keyword",
           "index": false,
           "doc_values": false
+        },
+        "search_field": {
+          "type": "text"
         }
       }
     }
