@@ -55,6 +55,7 @@ public class EsDocumentOperations extends BaseElasticOps {
     public static final String STATUS_FIELD = "status";
     public static final String APP_IDS_FIELD = "app_ids";
     public static final String CATEGORIES_FIELD = "categories";
+    public static final String DUPLICATE_OF_FIELD = "duplicate_of";
 
     private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(
             URL_FIELD, LANGUAGE_FIELD, SOURCE_FIELD, CREATED_FIELD, UPDATED_FIELD,
@@ -179,10 +180,14 @@ public class EsDocumentOperations extends BaseElasticOps {
     }
 
     public void store(HttpArticle article) {
-        store(article, Collections.emptyMap());
+        store(article, new HashMap<>());
     }
 
     public void store(HttpArticle article, Map<String, Object> fields) {
+        HttpArticle duplicate = findDuplicate(article);
+        if (duplicate != null && !article.getUrl().equalsIgnoreCase(duplicate.getUrl())) {
+            fields.put(DUPLICATE_OF_FIELD, duplicate.getUrl());
+        }
         try {
             XContentBuilder jsonBuilder = jsonBuilder();
             jsonBuilder.startObject();
@@ -234,6 +239,49 @@ public class EsDocumentOperations extends BaseElasticOps {
             }
         } catch (ElasticsearchStatusException e) {
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public HttpArticle findDuplicate(HttpArticle article) {
+        if (Strings.isNullOrEmpty(article.getTextSignature()) ||
+                Strings.isNullOrEmpty(article.getSource())) {
+            return null;
+        }
+        BoolQueryBuilder query = QueryBuilders.boolQuery();
+        if (!Strings.isNullOrEmpty(article.getTextSignature())) {
+            query.must(QueryBuilders.termQuery(TEXT_SIGNATURE_FIELD, article.getTextSignature()));
+        }
+        if (!Strings.isNullOrEmpty(article.getSource())) {
+            query.must(QueryBuilders.termQuery(SOURCE_FIELD, article.getSource()));
+        }
+        if (!Strings.isNullOrEmpty(article.getUrl())) {
+            query.mustNot(QueryBuilders.termQuery(URL_FIELD, article.getUrl()));
+        }
+        query.mustNot(QueryBuilders.existsQuery(DUPLICATE_OF_FIELD));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                .query(query)
+                .size(10)
+                .from(0)
+                .fetchSource(true);
+
+        SearchRequest searchRequest = new SearchRequest(getIndex())
+                .types(getType())
+                .searchType(SearchType.DEFAULT)
+                .source(searchSourceBuilder);
+        try {
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            List<HttpArticle> items = Arrays.stream(response.getHits().getHits())
+                    .map(SearchHit::getSourceAsMap)
+                    .filter(Objects::nonNull)
+                    .map(this::mapToHttpArticle)
+                    .collect(Collectors.toList());
+            if (!items.isEmpty()) {
+                return items.get(0);
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;

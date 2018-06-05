@@ -157,6 +157,9 @@
         },
         "text_signature": {
           "type": "keyword"
+        },
+        "duplicate_of": {
+          "type": "keyword"
         }
       }
     }
