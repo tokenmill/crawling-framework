@@ -7,6 +7,7 @@ import lt.tokenmill.crawling.data.HttpArticleParseResult;
 import lt.tokenmill.crawling.data.HttpSource;
 import lt.tokenmill.crawling.parser.data.MatchedDate;
 import lt.tokenmill.crawling.parser.data.MatchedString;
+import lt.tokenmill.crawling.parser.urls.UrlExtractor;
 import lt.tokenmill.crawling.parser.utils.JsonLdParser;
 import lt.tokenmill.crawling.parser.utils.TextFilters;
 import org.jsoup.Jsoup;
@@ -26,7 +27,7 @@ public class ArticleExtractor {
         Document document = Jsoup.parse(html, url);
         HttpArticleParseResult result = new HttpArticleParseResult();
         HttpArticle article = new HttpArticle();
-        article.setUrl(url);
+        article.setUrl(UrlExtractor.extract(url, document));
         article.setSource(source.getUrl());
         article.setLanguage(source.getLanguage());
         article.setAppIds(source.getAppIds());
