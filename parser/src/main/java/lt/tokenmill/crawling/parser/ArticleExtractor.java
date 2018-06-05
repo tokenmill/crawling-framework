@@ -10,6 +10,7 @@ import lt.tokenmill.crawling.parser.data.MatchedString;
 import lt.tokenmill.crawling.parser.urls.UrlExtractor;
 import lt.tokenmill.crawling.parser.utils.JsonLdParser;
 import lt.tokenmill.crawling.parser.utils.TextFilters;
+import lt.tokenmill.crawling.parser.utils.TextProfileSignature;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 public class ArticleExtractor {
 
+    private static TextProfileSignature textProfileSignature = new TextProfileSignature();
 
     public static HttpArticle extractArticle(String html, String url, HttpSource source, String publishedHint) {
         return extractArticleWithDetails(html, url, source, publishedHint).getArticle();
@@ -45,6 +47,7 @@ public class ArticleExtractor {
                 .map(MatchedString::getValue)
                 .map(t -> TextFilters.normalizeText(t, source.getTextNormalizers()))
                 .collect(Collectors.joining("\n")));
+        article.setTextSignature(textProfileSignature.getSignature(article.getText()));
         result.setTextMatches(texts.stream().map(MatchedString::getMatch).distinct().collect(Collectors.toList()));
 
         List<MatchedDate> publicationDates = extractPublicationDates(html, document, ldJsonArticle, source, publishedHint);

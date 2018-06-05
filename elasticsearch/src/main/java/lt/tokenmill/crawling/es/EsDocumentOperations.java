@@ -14,7 +14,6 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -52,13 +51,14 @@ public class EsDocumentOperations extends BaseElasticOps {
     public static final String DISCOVERED_FIELD = "discovered";
     public static final String TITLE_FIELD = "title";
     public static final String TEXT_FIELD = "text";
+    public static final String TEXT_SIGNATURE_FIELD = "text_signature";
     public static final String STATUS_FIELD = "status";
     public static final String APP_IDS_FIELD = "app_ids";
     public static final String CATEGORIES_FIELD = "categories";
 
     private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(
             URL_FIELD, LANGUAGE_FIELD, SOURCE_FIELD, CREATED_FIELD, UPDATED_FIELD,
-            PUBLISHED_FIELD, DISCOVERED_FIELD, TITLE_FIELD, TEXT_FIELD,
+            PUBLISHED_FIELD, DISCOVERED_FIELD, TITLE_FIELD, TEXT_FIELD, TEXT_SIGNATURE_FIELD,
             STATUS_FIELD, APP_IDS_FIELD, CATEGORIES_FIELD);
 
     protected EsDocumentOperations(ElasticConnection connection, String index, String type) {
@@ -202,7 +202,7 @@ public class EsDocumentOperations extends BaseElasticOps {
             String id = formatId(article.getUrl());
 
             XContentBuilder  update = jsonBuilder().startObject();
-            update.field("updated", now);
+            update.field(UPDATED_FIELD, now);
             for (Map.Entry<String, Object> entry : fields.entrySet()) {
                 update.field(entry.getKey(), entry.getValue());
             }
@@ -242,8 +242,8 @@ public class EsDocumentOperations extends BaseElasticOps {
     public List<DateHistogramValue> calculateStats(String sourceUrl) {
         try {
             BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                    .must(QueryBuilders.rangeQuery("created").gte("now-1M"))
-                    .must(QueryBuilders.termQuery("source", sourceUrl));
+                    .must(QueryBuilders.rangeQuery(CREATED_FIELD).gte("now-1M"))
+                    .must(QueryBuilders.termQuery(SOURCE_FIELD, sourceUrl));
 
             SearchRequest searchRequest = new SearchRequest(getIndex())
                     .types(getType())
@@ -252,7 +252,7 @@ public class EsDocumentOperations extends BaseElasticOps {
                             .query(filter)
                             .aggregation(AggregationBuilders
                                     .dateHistogram("urls_over_time")
-                                    .field("created")
+                                    .field(CREATED_FIELD)
                                     .format("yyyy-MM-dd")
                                     .dateHistogramInterval(DateHistogramInterval.DAY))
                             .explain(false)
@@ -288,6 +288,7 @@ public class EsDocumentOperations extends BaseElasticOps {
         applyField(builder, DISCOVERED_FIELD, fields, article.getDiscovered());
         applyField(builder, TITLE_FIELD, fields, article.getTitle());
         applyField(builder, TEXT_FIELD, fields, article.getText());
+        applyField(builder, TEXT_SIGNATURE_FIELD, fields, article.getTextSignature());
         applyField(builder, STATUS_FIELD, fields, "NEW");
         applyField(builder, APP_IDS_FIELD, fields, article.getAppIds());
         applyField(builder, CATEGORIES_FIELD, fields, article.getCategories());
@@ -311,15 +312,16 @@ public class EsDocumentOperations extends BaseElasticOps {
 
     protected HttpArticle mapToHttpArticle(Map<String, Object> source) {
         HttpArticle ha = new HttpArticle();
-        ha.setUrl(Objects.toString(source.get("url"), null));
-        ha.setLanguage(Objects.toString(source.get("language"), null));
-        ha.setSource(Objects.toString(source.get("source"), null));
-        ha.setTitle(Objects.toString(source.get("title"), null));
-        ha.setText(Objects.toString(source.get("text"), null));
-        ha.setPublished(EsDataParser.nullOrDate(source.get("published")));
-        ha.setDiscovered(EsDataParser.nullOrDate(source.get("discovered")));
-        ha.setAppIds(DataUtils.parseStringList(source.get("app_ids")));
-        ha.setCategories(DataUtils.parseStringList(source.get("categories")));
+        ha.setUrl(Objects.toString(source.get(URL_FIELD), null));
+        ha.setLanguage(Objects.toString(source.get(LANGUAGE_FIELD), null));
+        ha.setSource(Objects.toString(source.get(SOURCE_FIELD), null));
+        ha.setTitle(Objects.toString(source.get(TITLE_FIELD), null));
+        ha.setText(Objects.toString(source.get(TEXT_FIELD), null));
+        ha.setText(Objects.toString(source.get(TEXT_SIGNATURE_FIELD), null));
+        ha.setPublished(EsDataParser.nullOrDate(source.get(PUBLISHED_FIELD)));
+        ha.setDiscovered(EsDataParser.nullOrDate(source.get(DISCOVERED_FIELD)));
+        ha.setAppIds(DataUtils.parseStringList(source.get(APP_IDS_FIELD)));
+        ha.setCategories(DataUtils.parseStringList(source.get(CATEGORIES_FIELD)));
         return ha;
     }
 
