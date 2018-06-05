@@ -12,7 +12,8 @@
     <artifactId>crawler</artifactId>
 
     <properties>
-        <storm.scope>compile</storm.scope>
+        <storm.scope>provided</storm.scope>
+        <log4j.scope>provided</log4j.scope>
     </properties>
 
     <dependencies>
@@ -54,13 +55,13 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.7</version>
-            <scope>provided</scope>
+            <scope>${log4j.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.7</version>
-            <scope>provided</scope>
+            <scope>${log4j.scope}</scope>
         </dependency>
         <dependency>
             <groupId>lt.tokenmill.crawling</groupId>

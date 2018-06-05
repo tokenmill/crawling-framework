@@ -56,9 +56,9 @@ public class ArticleIndexerBolt extends BaseRichBolt {
         Boolean isSeed = Boolean.parseBoolean(metadata.getFirstValue(CrawlerConstants.META_IS_SEED));
         HttpSource httpSource = EsHttpSourcesCache.get(esHttpSourceOperations, source);
         UrlFilters urlFilters = UrlFiltersCache.get(httpSource);
-        String filtered = urlFilters.filter(url);
+        String filteredAndNormalizedUrl = urlFilters.filter(url);
 
-        if (filtered == null) {
+        if (filteredAndNormalizedUrl == null) {
             LOG.info("Skipping analysis of '{}' because it is rejected by filters", url);
             eventCounter.scope("analysis_skipped").incr();
             collector.emit(tuple, new Values(url, metadata));
@@ -102,13 +102,13 @@ public class ArticleIndexerBolt extends BaseRichBolt {
             try {
                 LOG.info("Analyzing url '{}'", url);
                 String html = new String(content, charset);
-                HttpArticle article = analyze(url, filtered, httpSource, html, metadata);
+                HttpArticle article = analyze(url, filteredAndNormalizedUrl, httpSource, html, metadata);
                 if (Strings.isNullOrEmpty(article.getTitle()) || Strings.isNullOrEmpty(article.getText()) || article.getPublished() == null) {
                     LOG.warn("Url '{}' analysis returned incomplete data", url);
                     eventCounter.scope("analysis_incomplete").incr();
                     collector.emit(StatusStreamName, tuple, new Values(url, metadata, Status.ERROR));
                 } else {
-                    Map<String, Object> fields = extractFields(url, filtered, httpSource, html, metadata);
+                    Map<String, Object> fields = extractFields(url, filteredAndNormalizedUrl, httpSource, html, metadata);
                     storeDocument(article, fields);
                     LOG.info("Stored article '{}'", url);
                     eventCounter.scope("analysis_success").incr();
@@ -132,17 +132,16 @@ public class ArticleIndexerBolt extends BaseRichBolt {
         this.esDocumentOperations.store(article, fields);
     }
 
-    private HttpArticle analyze(String url, String filtered, HttpSource httpSource, String html, Metadata metadata) throws Exception {
+    private HttpArticle analyze(String url, String filteredAndNormalizedUrl, HttpSource httpSource, String html, Metadata metadata) throws Exception {
         String publishedHint = metadata.getFirstValue(CrawlerConstants.META_PUBLISHED);
         if (publishedHint == null) {
             publishedHint = metadata.getFirstValue(CrawlerConstants.META_FEED_PUBLISHED);
         }
-        HttpArticle article = ArticleExtractor.extractArticle(html, filtered, httpSource, publishedHint);
+        HttpArticle article = ArticleExtractor.extractArticle(html, filteredAndNormalizedUrl, httpSource, publishedHint);
         String discovered = metadata.getFirstValue(CrawlerConstants.META_DISCOVERED);
         article.setDiscovered(DataUtils.parseFromUTC(discovered));
         return article;
     }
-
 
     @Override
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
