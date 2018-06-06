@@ -154,6 +154,12 @@
               "analyzer": "english_nostem_ci"
             }
           }
+        },
+        "text_signature": {
+          "type": "keyword"
+        },
+        "duplicate_of": {
+          "type": "keyword"
         }
       }
     }

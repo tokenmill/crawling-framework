@@ -17,6 +17,8 @@ public class HttpArticle {
 
     private String text;
 
+    private String textSignature;
+
     private List<String> appIds;
 
     private DateTime published;
@@ -97,6 +99,14 @@ public class HttpArticle {
         this.language = language;
     }
 
+    public String getTextSignature() {
+        return textSignature;
+    }
+
+    public void setTextSignature(String textSignature) {
+        this.textSignature = textSignature;
+    }
+
     @Override
     public String toString() {
         return "HttpArticle{" +
@@ -105,6 +115,7 @@ public class HttpArticle {
                 ", url='" + url + '\'' +
                 ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
+                ", textSignature='" + textSignature + '\'' +
                 ", appIds=" + appIds +
                 ", published=" + published +
                 ", discovered=" + discovered +
