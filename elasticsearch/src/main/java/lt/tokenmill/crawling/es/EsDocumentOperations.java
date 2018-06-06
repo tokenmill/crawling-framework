@@ -365,7 +365,7 @@ public class EsDocumentOperations extends BaseElasticOps {
         ha.setSource(Objects.toString(source.get(SOURCE_FIELD), null));
         ha.setTitle(Objects.toString(source.get(TITLE_FIELD), null));
         ha.setText(Objects.toString(source.get(TEXT_FIELD), null));
-        ha.setText(Objects.toString(source.get(TEXT_SIGNATURE_FIELD), null));
+        ha.setTextSignature(Objects.toString(source.get(TEXT_SIGNATURE_FIELD), null));
         ha.setPublished(EsDataParser.nullOrDate(source.get(PUBLISHED_FIELD)));
         ha.setDiscovered(EsDataParser.nullOrDate(source.get(DISCOVERED_FIELD)));
         ha.setAppIds(DataUtils.parseStringList(source.get(APP_IDS_FIELD)));
