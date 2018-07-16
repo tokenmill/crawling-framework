@@ -14,13 +14,11 @@
       "properties": {
         "created": {
           "type": "date",
-          "format": "date_optional_time",
-          "doc_values": true
+          "format": "date_optional_time"
         },
         "updated": {
           "type": "date",
-          "format": "date_optional_time",
-          "doc_values": true
+          "format": "date_optional_time"
         },
         "url": {
           "type": "keyword",
@@ -37,24 +35,19 @@
           "type": "keyword"
         },
         "url_crawl_delay_secs": {
-          "type": "integer",
-          "doc_values": true
+          "type": "integer"
         },
         "feed_crawl_delay_secs": {
-          "type": "integer",
-          "doc_values": true
+          "type": "integer"
         },
         "sitemap_crawl_delay_secs": {
-          "type": "integer",
-          "doc_values": true
+          "type": "integer"
         },
         "enabled": {
-          "type": "boolean",
-          "doc_values": true
+          "type": "boolean"
         },
         "discovery_enabled": {
-          "type": "boolean",
-          "doc_values": true
+          "type": "boolean"
         },
         "urls": {
           "type": "keyword",
