@@ -13,28 +13,22 @@
       },
       "properties": {
         "created": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "updated": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "published": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "url": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "source": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "status": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         }
       }
     }

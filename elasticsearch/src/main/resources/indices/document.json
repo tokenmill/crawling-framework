@@ -63,49 +63,40 @@
       },
       "properties": {
         "created": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "published": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "discovered": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "updated": {
-          "type": "date",
-          "doc_values": true
+          "type": "date"
         },
         "url": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "source": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "language": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "status": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "app_ids": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "categories": {
-          "type": "keyword",
-          "doc_values": true
+          "type": "keyword"
         },
         "title": {
           "type": "text",
           "index": true,
           "doc_values": false,
+          "fielddata": true,
           "fields": {
             "stem_cs": {
               "type": "text",
@@ -132,6 +123,7 @@
         "text": {
           "type": "text",
           "doc_values": false,
+          "fielddata": true,
           "fields": {
             "stem_cs": {
               "type": "text",
