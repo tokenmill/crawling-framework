@@ -1,6 +1,8 @@
 package lt.tokenmill.crawling.data;
 
-public class HttpSourceTest {
+import java.io.Serializable;
+
+public class HttpSourceTest implements Serializable {
 
     private String source;
 

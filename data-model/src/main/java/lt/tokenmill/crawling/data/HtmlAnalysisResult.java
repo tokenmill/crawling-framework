@@ -1,9 +1,10 @@
 package lt.tokenmill.crawling.data;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class HtmlAnalysisResult {
+public class HtmlAnalysisResult implements Serializable {
 
     private String url;
     private String title;

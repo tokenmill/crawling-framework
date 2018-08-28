@@ -1,8 +1,9 @@
 package lt.tokenmill.crawling.data;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class HighlightedSearchResult {
+public class HighlightedSearchResult implements Serializable {
 
     private HttpArticle article;
 

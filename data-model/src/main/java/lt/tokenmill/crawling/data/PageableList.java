@@ -1,8 +1,9 @@
 package lt.tokenmill.crawling.data;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class PageableList<T> {
+public class PageableList<T> implements Serializable {
 
     private long totalCount;
 

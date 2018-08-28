@@ -1,6 +1,8 @@
 package lt.tokenmill.crawling.data;
 
-public class NamedQuery {
+import java.io.Serializable;
+
+public class NamedQuery implements Serializable {
 
     private String name;
 
