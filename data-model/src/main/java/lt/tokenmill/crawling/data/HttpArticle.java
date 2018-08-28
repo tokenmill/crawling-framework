@@ -3,9 +3,10 @@ package lt.tokenmill.crawling.data;
 
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class HttpArticle {
+public class HttpArticle implements Serializable {
 
     private String source;
 

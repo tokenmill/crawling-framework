@@ -2,7 +2,9 @@ package lt.tokenmill.crawling.data;
 
 import org.joda.time.DateTime;
 
-public class HttpUrl {
+import java.io.Serializable;
+
+public class HttpUrl implements Serializable {
 
     /**
      * Source url.

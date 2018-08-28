@@ -1,11 +1,12 @@
 package lt.tokenmill.crawling.data;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 
-public class HttpSource {
+public class HttpSource implements Serializable {
 
     /**
      * Name of the source. Eg. Bloomberg

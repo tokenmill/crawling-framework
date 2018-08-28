@@ -1,9 +1,10 @@
 package lt.tokenmill.crawling.data;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-public class HttpArticleParseResult {
+public class HttpArticleParseResult implements Serializable {
 
     private HttpArticle article;
 
