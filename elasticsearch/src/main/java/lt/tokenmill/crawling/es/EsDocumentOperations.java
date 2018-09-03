@@ -206,7 +206,7 @@ public class EsDocumentOperations extends BaseElasticOps {
             Date now = new Date();
             String id = formatId(article.getUrl());
 
-            XContentBuilder  update = jsonBuilder().startObject();
+            XContentBuilder update = jsonBuilder().startObject();
             update.field(UPDATED_FIELD, now);
             for (Map.Entry<String, Object> entry : fields.entrySet()) {
                 update.field(entry.getKey(), entry.getValue());
