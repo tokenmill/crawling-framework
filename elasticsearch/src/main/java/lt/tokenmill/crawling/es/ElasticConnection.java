@@ -90,7 +90,8 @@ public class ElasticConnection {
         public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
             for (BulkItemResponse item : response.getItems()) {
                 if (item.isFailed()) {
-                    LOG.error("Bulk item failure: {}", item.getFailure());
+                    LOG.error("Bulk item failure: '{}' for request '{}'",
+                            item.getFailure(), request.requests().get(item.getItemId()));
                 }
             }
         }
