@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,10 @@ public class Utils {
             return null;
         }
         if (value instanceof List) {
+            List v = (List) value;
+            if (!v.isEmpty() && (v.get(0) instanceof Map)) {
+                return v;
+            }
             return listToText((List) value);
         } else if (value instanceof DateTime) {
             return ((DateTime) value).toDate();

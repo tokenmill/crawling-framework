@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +33,7 @@ public class EsDocumentOperationsTest {
         assertEquals(article.getUrl(), httpArticle.getUrl());
         assertEquals(article.getText(), httpArticle.getText());
 
-        esDocumentOperations.update(article, ImmutableMap.of("TESTKEY", "TESTVAL"));
+        esDocumentOperations.update(article, ImmutableMap.of("TESTKEY", Arrays.asList(ImmutableMap.of("k1", "v1"))));
         Thread.sleep(6000);
         Map<String, Object> articleMap = esDocumentOperations.getAsMap(article.getUrl());
         assertEquals(article.getText(), articleMap.get("text"));
