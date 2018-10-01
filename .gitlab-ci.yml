@@ -1,0 +1,14 @@
+stages:
+- test
+- build
+
+unit-tests:
+  services:
+  - name: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
+    alias: elasticsearch
+
+  image: registry.gitlab.com/tokenmill/crawling-framework/deps:latest
+  stage: test
+  when: always
+  script:
+  - mvn clean test
