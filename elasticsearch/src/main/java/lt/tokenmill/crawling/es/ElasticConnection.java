@@ -22,6 +22,7 @@ import java.net.URLDecoder;
 public class ElasticConnection {
     private static final Logger LOG = LoggerFactory.getLogger(ElasticConnection.class);
 
+    private static final String DEFAULT_HOSTNAME = "0.0.0.0";
     private static final int DEFAULT_REST_PORT = 9200;
     private static final String DEFAULT_REST_SCHEME = "http";
     private static final int DEFAULT_BULK_ACTIONS = 10;
@@ -35,6 +36,56 @@ public class ElasticConnection {
         this.processor = processor;
         this.restHighLevelClient = restHighLevelClient;
         this.restClientBuilder = restClient;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String hostname = DEFAULT_HOSTNAME;
+        private int restPort = DEFAULT_REST_PORT;
+        private String restScheme = DEFAULT_REST_SCHEME;
+        private String flushIntervalString = ElasticConnection.DEFAULT_FLUSH_INTERVAL_STRING;
+        private int bulkActions = DEFAULT_BULK_ACTIONS;
+        private BulkProcessor.Listener listener = DEFAULT_BULK_LISTENER;
+
+        public Builder() {}
+
+        public Builder hostname(String hostname) {
+            this.hostname = hostname;
+            return this;
+        }
+
+        public Builder restPort(int restPort) {
+            this.restPort = restPort;
+            return this;
+        }
+
+        public Builder restScheme(String restScheme) {
+            this.restScheme = restScheme;
+            return this;
+        }
+
+        public Builder flushIntervalString(String flushIntervalString) {
+            this.flushIntervalString = flushIntervalString;
+            return this;
+        }
+
+        public Builder bulkActions(int bulkActions) {
+            this.bulkActions = bulkActions;
+            return this;
+        }
+
+        public Builder listener(BulkProcessor.Listener listener) {
+            this.listener = listener;
+            return this;
+        }
+
+        public ElasticConnection build() {
+            return getConnection(this.hostname, this.restPort, this.restScheme, this.flushIntervalString,
+                    this.bulkActions, this.listener);
+        }
     }
 
     public RestHighLevelClient getRestHighLevelClient() {
