@@ -1,0 +1,11 @@
+FROM registry.gitlab.com/tokenmill/crawling-framework/deps:latest
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN mvn clean package -Pbigjar
+
+CMD ["java", "-Dconfig=administration-ui/conf/docker-compose.properties", "-jar", "administration-ui/target/administration-ui-standalone.jar"]
+

@@ -1,0 +1,12 @@
+FROM registry.gitlab.com/tokenmill/crawling-framework/deps:latest
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN mvn install && \
+    cd crawler && \
+    mvn package -Dstorm.scope=compile -Dlog4j.scope=compile -Pbigjar -DskipTests
+
+CMD ["java", "-cp", "crawler/target/crawler-standalone.jar", "lt.tokenmill.crawling.crawler.CrawlerTopology", "-local", "-conf", "crawler/conf/docker-compose.yaml"]
