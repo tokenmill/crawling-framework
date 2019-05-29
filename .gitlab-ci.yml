@@ -17,7 +17,7 @@ prepare-base-docker:
     - docker rmi registry.gitlab.com/tokenmill/crawling-framework/base:latest
 
 unit-tests:
-  image: registry.gitlab.com/tokenmill/crawling-framework/deps:latest
+  image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
   stage: test
   when: always
   script:
