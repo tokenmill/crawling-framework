@@ -1,27 +1,11 @@
 FROM maven:3.5.4-jdk-8-alpine as builder
 
-RUN mkdir -p /usr/src/administration-ui
-RUN mkdir -p /usr/src/app/analysis-ui
-RUN mkdir -p /usr/src/app/crawler
-RUN mkdir -p /usr/src/app/data-model
-RUN mkdir -p /usr/src/app/elasticsearch
-RUN mkdir -p /usr/src/app/page-analyzer
-RUN mkdir -p /usr/src/app/parser
-RUN mkdir -p /usr/src/app/ui-commons
-WORKDIR /usr/src/app
+RUN mkdir -p /usr/src/cf
+WORKDIR /usr/src/cf
 
-ADD administration-ui/pom.xml administration-ui/pom.xml
-ADD analysis-ui/pom.xml analysis-ui/pom.xml
-ADD crawler/pom.xml crawler/pom.xml
-ADD data-model/pom.xml data-model/pom.xml
-ADD elasticsearch/pom.xml elasticsearch/pom.xml
-ADD page-analyzer/pom.xml page-analyzer/pom.xml
-ADD parser/pom.xml parser/pom.xml
-ADD parser/pom.xml parser/pom.xml
-ADD ui-commons/pom.xml ui-commons/pom.xml
-ADD pom.xml pom.xml
+COPY . .
 
-RUN ["mvn", "verify", "clean", "--fail-never"]
+RUN mvn clean install
 
 FROM maven:3.5.4-jdk-8-alpine
 COPY --from=builder /root/.m2/ /root/.m2/
