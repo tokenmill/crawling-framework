@@ -29,6 +29,19 @@ prepare-base-elasticsearch:
     - docker push registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
     - docker rmi registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
 
+prepare-administration-ui:
+  stage: base
+  image: docker:stable
+  when: manual
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker build -f Dockerfile.ui -t registry.gitlab.com/tokenmill/crawling-framework/ui:latest .
+    - docker push registry.gitlab.com/tokenmill/crawling-framework/ui:latest
+    - docker rmi registry.gitlab.com/tokenmill/crawling-framework/ui:latest
+
 unit-tests:
   stage: test
   image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
