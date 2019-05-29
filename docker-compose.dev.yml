@@ -13,11 +13,7 @@ services:
       SERVER_NAME: kibana
       ELASTICSEARCH_URL: http://elasticsearch:9200
   administration-ui:
-    build:
-      context: .
-      dockerfile: Dockerfile.ui
+    image: registry.gitlab.com/tokenmill/crawling-framework/ui:latest
     ports: ["8081:8081"]
   crawler:
-    build:
-      context: .
-      dockerfile: Dockerfile.crawler
+    image: registry.gitlab.com/tokenmill/crawling-framework/crawler:latest

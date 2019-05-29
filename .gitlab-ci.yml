@@ -42,6 +42,19 @@ prepare-administration-ui:
     - docker push registry.gitlab.com/tokenmill/crawling-framework/ui:latest
     - docker rmi registry.gitlab.com/tokenmill/crawling-framework/ui:latest
 
+prepare-crawler:
+  stage: base
+  image: docker:stable
+  when: manual
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker build -f Dockerfile.crawler -t registry.gitlab.com/tokenmill/crawling-framework/crawler:latest .
+    - docker push registry.gitlab.com/tokenmill/crawling-framework/crawler:latest
+    - docker rmi registry.gitlab.com/tokenmill/crawling-framework/crawler:latest
+
 unit-tests:
   stage: test
   image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
