@@ -18,7 +18,7 @@ import static java.lang.System.currentTimeMillis;
 
 public class HttpSourceConfiguration {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UrlGeneratorSpout.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpSourceConfiguration.class);
 
     private final List<HttpSource> sources;
     private final List<String> sourceUrls;
@@ -83,7 +83,8 @@ public class HttpSourceConfiguration {
     }
 
     public static boolean needsReload() {
-        LOG.info("Checking reloading timeout. Remaining milliseconds: {}", lastReloadMillis + CrawlerConstants.DEFAULT_SOURCE_RELOAD_DELAY - currentTimeMillis());
+        LOG.info("Checking reloading timeout. Remaining milliseconds: {}",
+                lastReloadMillis + CrawlerConstants.DEFAULT_SOURCE_RELOAD_DELAY - currentTimeMillis());
         return lastReloadMillis + CrawlerConstants.DEFAULT_SOURCE_RELOAD_DELAY < currentTimeMillis();
     }
 
