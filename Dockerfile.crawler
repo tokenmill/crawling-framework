@@ -1,4 +1,4 @@
-FROM registry.gitlab.com/tokenmill/crawling-framework/deps:latest
+FROM registry.gitlab.com/tokenmill/crawling-framework/base:latest
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

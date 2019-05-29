@@ -1,5 +1,8 @@
 # Crawling Framework
 
+[![Maven Central](https://img.shields.io/maven-central/v/lt.tokenmill.crawling/crawling-framework.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22lt.tokenmill.crawling%22%20AND%20a:%22crawling-framework%22)
+[![pipeline status](https://gitlab.com/tokenmill/crawling-framework/badges/master/pipeline.svg)](https://gitlab.com/tokenmill/crawling-framework/commits/master)
+
 Crawling Framework aims at providing instruments to configure and run your [Storm Crawler](http://stormcrawler.net/) based crawler. It mainly aims at easing crawling of article content publishing sites like news portals or blog sites. With the help of GUI tool Crawling Framework provides you can:
 
 1. Specify which sites to crawl.
