@@ -2,7 +2,7 @@ version: '2'
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
+    image: registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
     ports: ["9200:9200"]
     environment:
       discovery.type: single-node

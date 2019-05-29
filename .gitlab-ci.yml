@@ -1,14 +1,47 @@
 stages:
-- test
-- build
+  - base
+  - test
+  - build
+
+prepare-base-docker:
+  stage: base
+  image: docker:stable
+  when: manual
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker build -f Dockerfile.base -t registry.gitlab.com/tokenmill/crawling-framework/base:latest .
+    - docker push registry.gitlab.com/tokenmill/crawling-framework/base:latest
+    - docker rmi registry.gitlab.com/tokenmill/crawling-framework/base:latest
+
+prepare-base-elasticsearch:
+  stage: base
+  image: docker:stable
+  when: manual
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker build -f Dockerfile.es -t registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest .
+    - docker push registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
+    - docker rmi registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
 
 unit-tests:
-  services:
-  - name: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
-    alias: elasticsearch
-
-  image: registry.gitlab.com/tokenmill/crawling-framework/deps:latest
   stage: test
+  image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
   when: always
   script:
-  - mvn clean test
+    - mvn clean test
+
+integration-tests:
+  stage: test
+  image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
+  services:
+    - name: registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
+      alias: elasticsearch
+  when: always
+  script:
+    - mvn -Dtest=*TestInt -DfailIfNoTests=false clean test
