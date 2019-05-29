@@ -44,4 +44,4 @@ integration-tests:
       alias: elasticsearch
   when: always
   script:
-    - mvn -Dtest=*TestInt clean test
+    - mvn -Dtest=*TestInt -DfailIfNoTests=false clean test
