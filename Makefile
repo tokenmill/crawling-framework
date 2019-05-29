@@ -12,3 +12,9 @@ build-base-docker:
 
 publish-base-docker: build-base-docker
 	docker push registry.gitlab.com/tokenmill/crawling-framework/deps:latest
+
+run-framework:
+	docker-compose -f docker-compose.run.yml pull && \
+	docker-compose -f docker-compose.run.yml down && \
+	docker-compose -f docker-compose.run.yml build && \
+	docker-compose -f docker-compose.run.yml up --remove-orphans

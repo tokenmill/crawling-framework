@@ -1,0 +1,74 @@
+fetcher.server.delay: 4.5
+fetcher.server.min.delay: 3.0
+fetcher.queue.mode: "byHost"
+fetcher.threads.per.queue: 1
+fetcher.threads.number: 5
+
+partition.url.mode: "byHost"
+
+metadata.track.path: false
+metadata.track.depth: false
+metadata.transfer:
+ - "source"
+
+http.agent.name: "NewsRadar"
+http.agent.version: "1.0"
+http.agent.description: "News Crawler"
+http.agent.url: ""
+http.agent.email: ""
+
+http.accept.language: "en-us,en-gb,en;q=0.7,*;q=0.3"
+http.accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+http.content.limit: 1048576
+http.store.responsetime: false
+http.timeout: 30000
+
+http.robots.403.allow: true
+
+protocols: "http,https"
+http.protocol.implementation: "com.digitalpebble.stormcrawler.protocol.httpclient.HttpProtocol"
+https.protocol.implementation: "com.digitalpebble.stormcrawler.protocol.httpclient.HttpProtocol"
+
+urlfilters.config.file: "urlfilters.json"
+
+# revisit a page monthly (value in minutes)
+fetchInterval.default: 44640
+
+# revisit a page with a fetch error after 2 hours (value in minutes)
+fetchInterval.fetch.error: 120
+
+# revisit a page with an error every month (value in minutes)
+fetchInterval.error: 44640
+
+# Default implementation of Scheduler
+scheduler.class: "com.digitalpebble.stormcrawler.persistence.DefaultScheduler"
+
+topology.workers: 1
+topology.sleep.spout.wait.strategy.time.ms: 5000
+topology.message.timeout.secs: 300
+topology.max.spout.pending: 100
+topology.debug: false
+
+# ElasticSearch configuration
+es.hostname: "elasticsearch"
+es.rest.port: 9200
+
+es.urls.index.name: "urls"
+es.urls.doc.type: "url"
+es.docs.index.name: "docs"
+es.docs.doc.type: "doc"
+es.httpsource.index.name: "http_sources"
+es.httpsource.doc.type: "http_source"
+
+# MetricsConsumer configuration
+es.metrics.addresses: "elasticsearch:9300"
+es.metrics.index.name: "metrics"
+es.metrics.doc.type: "datapoint"
+es.metrics.cluster.name: "elasticsearch"
+es.metrics.blacklist:
+  - "__"
+  - "uptime"
+  - "memory"
+  - "GC"
+  - "newWorkerEvent"
+  - "startTimeSecs"

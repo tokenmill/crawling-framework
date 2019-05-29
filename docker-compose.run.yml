@@ -12,3 +12,10 @@ services:
     environment:
       SERVER_NAME: kibana
       ELASTICSEARCH_URL: http://elasticsearch:9200
+  administration-ui:
+    image: registry.gitlab.com/tokenmill/crawling-framework/ui:latest
+    ports: ["8081:8081"]
+  crawler:
+    image: registry.gitlab.com/tokenmill/crawling-framework/crawler:latest
+    environment:
+      DEFAULT_SOURCE_RELOAD_DELAY: 10
