@@ -30,8 +30,18 @@ prepare-base-elasticsearch:
     - docker rmi registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
 
 unit-tests:
-  image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
   stage: test
+  image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
   when: always
   script:
     - mvn clean test
+
+integration-tests:
+  stage: test
+  image: registry.gitlab.com/tokenmill/crawling-framework/base:latest
+  services:
+    - name: registry.gitlab.com/tokenmill/crawling-framework/elasticsearch:latest
+      alias: elasticsearch
+  when: always
+  script:
+    - mvn -Dtest=*TestInt clean test
