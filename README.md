@@ -1,3 +1,7 @@
+<a href="http://www.tokenmill.lt">
+      <img src=".github/tokenmill-logo.svg" width="125" height="125" align="right" />
+</a>
+
 # Crawling Framework
 
 [![Maven Central](https://img.shields.io/maven-central/v/lt.tokenmill.crawling/crawling-framework.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22lt.tokenmill.crawling%22%20AND%20a:%22crawling-framework%22)
@@ -31,7 +35,6 @@ See [Crawling Framework Example](https://github.com/tokenmill/crawling-framework
 
 ## License
 
-Copyright © 2017 [TokenMill](http://www.tokenmill.co/)
+Copyright &copy; 2017-2019 [TokenMill UAB](http://www.tokenmill.lt).
 
-Distributed under the The Apache License, Version 2.0
-
+Distributed under the The Apache License, Version 2.0.
