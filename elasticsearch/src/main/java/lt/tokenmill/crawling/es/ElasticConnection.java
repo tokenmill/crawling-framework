@@ -53,7 +53,7 @@ public class ElasticConnection {
         }
 
         public boolean hasCredentials(){
-            return !this.username.isEmpty() && !this.password.isEmpty();
+            return this.username != null && this.password != null;
         }
 
         public CredentialsProvider getCredentials(){
@@ -140,6 +140,7 @@ public class ElasticConnection {
         ESCredentials credentials = new ESCredentials();
         RestClientBuilder restClient = RestClient.builder(new HttpHost(hostname, restPort, restScheme));
         if(credentials.hasCredentials()) {
+            LOG.info("Found credentials. Applying");
             restClient.setHttpClientConfigCallback(b -> b.setDefaultCredentialsProvider(credentials.getCredentials()));
         }
 
