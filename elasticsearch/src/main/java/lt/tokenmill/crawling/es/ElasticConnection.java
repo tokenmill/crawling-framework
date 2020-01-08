@@ -1,6 +1,10 @@
 package lt.tokenmill.crawling.es;
 
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -36,6 +40,30 @@ public class ElasticConnection {
         this.processor = processor;
         this.restHighLevelClient = restHighLevelClient;
         this.restClientBuilder = restClient;
+    }
+
+    private static class ESCredentials{
+        private final String username;
+        private final String password;
+        private final CredentialsProvider credentialsProvider;
+        public ESCredentials(){
+            this.username = System.getenv("ES_USERNAME");
+            this.password = System.getenv("ES_PASSWORD");
+            this.credentialsProvider = new BasicCredentialsProvider();
+        }
+
+        public boolean hasCredentials(){
+            return !this.username.isEmpty() && !this.password.isEmpty();
+        }
+
+        public CredentialsProvider getCredentials(){
+            this.credentialsProvider.setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials("user", "password")
+            );
+
+            return this.credentialsProvider;
+        }
     }
 
     public static Builder builder() {
@@ -109,8 +137,12 @@ public class ElasticConnection {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
 
         TimeValue flushInterval = TimeValue.parseTimeValue(flushIntervalString, TimeValue.timeValueSeconds(5), "flush");
-
+        ESCredentials credentials = new ESCredentials();
         RestClientBuilder restClient = RestClient.builder(new HttpHost(hostname, restPort, restScheme));
+        if(credentials.hasCredentials()) {
+            restClient.setHttpClientConfigCallback(b -> b.setDefaultCredentialsProvider(credentials.getCredentials()));
+        }
+
         RestHighLevelClient restHighLevelClient = new RestHighLevelClient(restClient);
 
         BulkProcessor bulkProcessor = BulkProcessor.builder(restHighLevelClient::bulkAsync, listener)
