@@ -59,7 +59,7 @@ public class ElasticConnection {
         public CredentialsProvider getCredentials(){
             this.credentialsProvider.setCredentials(
                     AuthScope.ANY,
-                    new UsernamePasswordCredentials("user", "password")
+                    new UsernamePasswordCredentials(this.username, this.password)
             );
 
             return this.credentialsProvider;
