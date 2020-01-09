@@ -28,6 +28,10 @@ Framework writes its configuration and stores crawled data to ElasticSearch. Bef
 
 Crawling Framework is a Java lib which will have to be extended to run Storm Crawler topology, thus Java (JDK8, Maven) infrastructure will be needed. 
 
+### Using password protected ElasticSearch
+
+Some providers hide ElasticSearch under authentification step (Which makes sense). Just set environment variables `ES_USERNAME` and `ES_PASSWORD` accordingly, everything else can remain the same. Authentification step will be done implicitly if proper credentials are there
+
 ## Configuring and Running a crawl
 
 See [Crawling Framework Example](https://github.com/tokenmill/crawling-framework-example) project's documentation.
