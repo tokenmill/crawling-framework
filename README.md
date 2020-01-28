@@ -24,7 +24,7 @@ We have recorded a video on how to setup and use Crawling Framework. Click on th
 
 ## Requirements
 
-Framework writes its configuration and stores crawled data to ElasticSearch. Before starting crawl project [install ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html) (Crawling Framework is tested to work with Elastic v5.5.x).
+Framework writes its configuration and stores crawled data to ElasticSearch. Before starting crawl project [install ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html) (Crawling Framework is tested to work with Elastic v7.x).
 
 Crawling Framework is a Java lib which will have to be extended to run Storm Crawler topology, thus Java (JDK8, Maven) infrastructure will be needed. 
 
@@ -39,6 +39,6 @@ See [Crawling Framework Example](https://github.com/tokenmill/crawling-framework
 
 ## License
 
-Copyright &copy; 2017-2019 [TokenMill UAB](http://www.tokenmill.lt).
+Copyright &copy; 2017-2019 [TokenMill UAB](http://www.tokenmill.ai).
 
 Distributed under the The Apache License, Version 2.0.

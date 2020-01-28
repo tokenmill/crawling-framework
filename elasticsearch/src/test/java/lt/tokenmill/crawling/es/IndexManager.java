@@ -5,6 +5,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
@@ -36,11 +37,11 @@ public class IndexManager {
     }
 
     private void deleteAlias(String indexName, String aliasName) throws IOException {
-        restClient.performRequest("DELETE", indexName.concat("/_alias/").concat(aliasName));
+        restClient.performRequest(new Request("DELETE", indexName.concat("/_alias/").concat(aliasName)));
     }
 
     private void addAlias(String indexName, String aliasName) throws IOException {
-        restClient.performRequest("PUT", indexName.concat("/_aliases/").concat(aliasName));
+        restClient.performRequest(new Request("PUT", indexName.concat("/_aliases/").concat(aliasName)));
     }
 
     public void prepare(String aliasName, String indexConf, boolean update) {
@@ -80,10 +81,10 @@ public class IndexManager {
     public String findIndex(String aliasName) {
         String indexName = null;
         try {
-            Response response = this.restClient.performRequest("HEAD", aliasName);
+            Response response = this.restClient.performRequest(new Request("HEAD", aliasName));
             if (response.getStatusLine().getStatusCode() != 404) {
                 // Index with aliasName exists, so we need to get real index name from settings
-                response = this.restClient.performRequest("GET", aliasName.concat("/_settings"));
+                response = this.restClient.performRequest(new Request("GET", aliasName.concat("/_settings")));
 //                JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
 //                indexName = json.keySet().stream().findFirst().orElse("");
             }
@@ -103,7 +104,10 @@ public class IndexManager {
         HttpEntity entity = new NStringEntity(indexConf, ContentType.APPLICATION_JSON);
         String indexName = aliasName + INDEX_VERSION_INFIX + version;
         try {
-            restClient.performRequest("PUT", indexName, Collections.emptyMap(), entity);
+            Request indexReq = new Request("PUT", indexName);
+            indexReq.addParameters(Collections.emptyMap());
+            indexReq.setEntity(entity);
+            restClient.performRequest(indexReq);
             addAlias(indexName, aliasName);
         } catch (IOException e) {
             e.printStackTrace();
