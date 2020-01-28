@@ -101,7 +101,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
 
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
 
             SearchHits hits = response.getHits();
             return Arrays.stream(hits.getHits())
@@ -141,7 +141,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                     .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
             ParsedDateHistogram hits = response.getAggregations().get("urls_over_time");
             return hits.getBuckets().stream()
                     .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))

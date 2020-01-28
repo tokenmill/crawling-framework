@@ -66,7 +66,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
 
             SearchHits hits = response.getHits();
             return Arrays.stream(hits.getHits())
@@ -84,7 +84,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
         try {
             GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
-            GetResponse response = getConnection().getRestHighLevelClient().get(getRequest);
+            GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
                 return mapToHttpSource(response.getSource());
             }
@@ -127,7 +127,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
 
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
 
             List<HttpSource> items = Arrays.stream(response.getHits().getHits())
                     .map(SearchHit::getSourceAsMap)
@@ -135,7 +135,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .map(this::mapToHttpSource)
                     .sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()))
                     .collect(Collectors.toList());
-            return PageableList.create(items, response.getHits().getTotalHits());
+            return PageableList.create(items, response.getHits().getTotalHits().value);
         } catch (ElasticsearchStatusException e) {
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,7 +162,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .scroll(keepAlive)
                     .source(searchSourceBuilder);
 
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
             List<HttpSource> result = Lists.newArrayList();
             do {
                 result.addAll(Arrays.stream(response.getHits().getHits())
@@ -173,7 +173,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
 
                 SearchScrollRequest searchScrollRequest = new SearchScrollRequest(response.getScrollId())
                         .scroll(keepAlive);
-                response = getConnection().getRestHighLevelClient().searchScroll(searchScrollRequest);
+                response = getConnection().getRestHighLevelClient().searchScroll(searchScrollRequest, getRequestOptions());
             } while (response.getHits().getHits().length != 0);
             return result;
         } catch (ElasticsearchStatusException e) {
@@ -215,7 +215,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
             IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(url))
                     .source(xContentBuilder)
                     .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            getConnection().getRestHighLevelClient().index(indexRequest);
+            getConnection().getRestHighLevelClient().index(indexRequest, getRequestOptions());
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source with url '{}'", source.getUrl());
         }
@@ -227,7 +227,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
             try {
                 DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url))
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-                getConnection().getRestHighLevelClient().delete(deleteRequest);
+                getConnection().getRestHighLevelClient().delete(deleteRequest, getRequestOptions());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -247,7 +247,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .scroll(keepAlive)
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
             do {
                 Arrays.stream(response.getHits().getHits())
                         .map(SearchHit::getSourceAsMap)
@@ -257,7 +257,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                         .forEach(this::delete);
                 SearchScrollRequest searchScrollRequest = new SearchScrollRequest(response.getScrollId())
                         .scroll(keepAlive);
-                response = getConnection().getRestHighLevelClient().searchScroll(searchScrollRequest);
+                response = getConnection().getRestHighLevelClient().searchScroll(searchScrollRequest, getRequestOptions());
             } while (response.getHits().getHits().length != 0);
         } catch (Exception e) {
             e.printStackTrace();

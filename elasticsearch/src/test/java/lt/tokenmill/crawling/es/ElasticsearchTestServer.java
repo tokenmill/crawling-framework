@@ -22,7 +22,7 @@ public class ElasticsearchTestServer {
 
     private static class MyNode extends Node {
         MyNode(Settings preparedSettings, Collection<Class<? extends Plugin>> classpathPlugins) {
-            super(new Environment(preparedSettings, null), classpathPlugins);
+            super(new Environment(preparedSettings, null), classpathPlugins, false);
         }
     }
 

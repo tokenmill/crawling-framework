@@ -93,14 +93,14 @@ public class EsDocumentOperations extends BaseElasticOps {
                     .types(getType())
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
 
             List<HttpArticle> items = Arrays.stream(response.getHits().getHits())
                     .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToHttpArticle)
                     .collect(Collectors.toList());
-            return PageableList.create(items, response.getHits().getTotalHits());
+            return PageableList.create(items, response.getHits().getTotalHits().value);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -151,13 +151,13 @@ public class EsDocumentOperations extends BaseElasticOps {
                     .types(getType())
                     .source(sourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
 
             List<HighlightedSearchResult> items = Arrays.stream(response.getHits().getHits())
                     .filter(sh -> sh.getSourceAsMap() != null)
                     .map(this::mapToHighlightedResult)
                     .collect(Collectors.toList());
-            return PageableList.create(items, response.getHits().getTotalHits());
+            return PageableList.create(items, response.getHits().getTotalHits().value);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,7 +233,7 @@ public class EsDocumentOperations extends BaseElasticOps {
         try {
             GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
-            GetResponse response = getConnection().getRestHighLevelClient().get(getRequest);
+            GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
                 return response.getSource();
             }
@@ -272,7 +272,7 @@ public class EsDocumentOperations extends BaseElasticOps {
                 .searchType(SearchType.DEFAULT)
                 .source(searchSourceBuilder);
         try {
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
             List<HttpArticle> items = Arrays.stream(response.getHits().getHits())
                     .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
@@ -307,7 +307,7 @@ public class EsDocumentOperations extends BaseElasticOps {
                             .fetchSource(true)
                             .size(0));
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
             ParsedDateHistogram hits = response.getAggregations().get("urls_over_time");
             return hits.getBuckets().stream()
                     .map(b -> new DateHistogramValue(b.getKeyAsString(), b.getDocCount()))

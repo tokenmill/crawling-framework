@@ -14,6 +14,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -64,14 +65,16 @@ public class EsNamedQueryOperations extends BaseElasticOps {
             SearchRequest searchRequest = new SearchRequest(getIndex())
                     .types(getType())
                     .source(searchSourceBuilder);
+
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
+
             List<NamedQuery> items = Arrays.stream(response.getHits().getHits())
                     .map(SearchHit::getSourceAsMap)
                     .filter(Objects::nonNull)
                     .map(this::mapToNamedQuery)
                     .collect(Collectors.toList());
-            return PageableList.create(items, response.getHits().getTotalHits());
+            return PageableList.create(items, response.getHits().getTotalHits().value);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,7 +94,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .types(getType())
                     .source(sourceRequestBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
             return response.getSuggest().filter(CompletionSuggestion.class).stream()
                     .flatMap(s -> s.getOptions().stream())
                     .sorted(Comparator.comparingDouble(Suggest.Suggestion.Entry.Option::getScore))
@@ -109,7 +112,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
         try {
             GetResponse response = getConnection().getRestHighLevelClient()
                     .get(new GetRequest(getIndex(), getType(), formatId(name))
-                            .fetchSourceContext(new FetchSourceContext(true)));
+                            .fetchSourceContext(new FetchSourceContext(true)), getRequestOptions());
             if (response.isExists()) {
                 return mapToNamedQuery(response.getSource());
             }
@@ -127,7 +130,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .scroll(keepAlive)
                     .source(new SearchSourceBuilder().query(QueryBuilders.matchAllQuery()));
             SearchResponse response = getConnection().getRestHighLevelClient()
-                    .search(searchRequest);
+                    .search(searchRequest, getRequestOptions());
             List<NamedQuery> result = Lists.newArrayList();
             do {
                 result.addAll(Arrays.stream(response.getHits().getHits())
@@ -137,7 +140,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                         .collect(Collectors.toList()));
                 response = getConnection().getRestHighLevelClient()
                         .searchScroll(new SearchScrollRequest(response.getScrollId())
-                                .scroll(keepAlive));
+                                .scroll(keepAlive), getRequestOptions());
             } while (response.getHits().getHits().length != 0);
             return result;
         } catch (IOException e) {
@@ -164,7 +167,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
             IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(nq.getName()))
                     .source(contentBuilder)
                     .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            getConnection().getRestHighLevelClient().index(indexRequest);
+            getConnection().getRestHighLevelClient().index(indexRequest, getRequestOptions());
         } catch (IOException e) {
             LOG.error("Failed to save HTTP source test with url '{}'", nq.getName());
         }
@@ -176,7 +179,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
             try {
                 DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(nq.getName()))
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-                getConnection().getRestHighLevelClient().delete(deleteRequest);
+                getConnection().getRestHighLevelClient().delete(deleteRequest, getRequestOptions());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -195,7 +198,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                             .fetchSource(true)
                             .query(QueryBuilders.matchAllQuery()));
 
-            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest);
+            SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
             do {
                 Arrays.stream(response.getHits().getHits())
                         .map(SearchHit::getSourceAsMap)
@@ -203,7 +206,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                         .map(this::mapToNamedQuery)
                         .forEach(this::delete);
                 response = getConnection().getRestHighLevelClient()
-                        .searchScroll(new SearchScrollRequest(response.getScrollId()).scroll(keepAlive));
+                        .searchScroll(new SearchScrollRequest(response.getScrollId()).scroll(keepAlive), getRequestOptions());
             } while (response.getHits().getHits().length != 0);
         } catch (IOException e) {
             e.printStackTrace();
