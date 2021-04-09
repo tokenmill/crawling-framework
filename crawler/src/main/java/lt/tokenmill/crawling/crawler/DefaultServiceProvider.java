@@ -2,6 +2,10 @@ package lt.tokenmill.crawling.crawler;
 
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.google.common.collect.Maps;
+import lt.tokenmill.crawling.cache.CacheConstants;
+import lt.tokenmill.crawling.cache.UrlProcessingCache;
+import lt.tokenmill.crawling.cache.providers.CacheProvider;
+import lt.tokenmill.crawling.cache.providers.redis.RedisProvider;
 import lt.tokenmill.crawling.es.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +51,16 @@ public class DefaultServiceProvider implements ServiceProvider, Serializable {
         String docsIndexName = ConfUtils.getString(conf, ElasticConstants.ES_DOCS_INDEX_NAME_PARAM);
         String docsDocumentType = ConfUtils.getString(conf, ElasticConstants.ES_DOCS_DOC_TYPE_PARAM);
         return EsDocumentOperations.getInstance(connection, docsIndexName, docsDocumentType);
+    }
+
+    @Override
+    public UrlProcessingCache createUrlProcessingCache(Map conf) {
+        CacheProvider provider = RedisProvider.builder()
+                .withHost(ConfUtils.getString(conf, CacheConstants.REDIS_HOST, "localhost"))
+                .withPort(ConfUtils.getInt(conf, CacheConstants.REDIS_PORT, 6379))
+                .withAuth(ConfUtils.getString(conf, CacheConstants.REDIS_AUTH, null))
+                .build();
+        return new UrlProcessingCache(provider);
     }
 
 }

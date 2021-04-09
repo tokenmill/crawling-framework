@@ -15,6 +15,10 @@ public class RedisProvider implements CacheProvider {
     private final RedisKVProvider kvProvider;
     private final RedisSetProvider setProvider;
 
+    public static Builder builder(){
+        return new Builder();
+    }
+
     protected RedisProvider(JedisPool pool){
         this.resourceProvider = new RedisResourceProvider(pool);
         this.kvProvider = new RedisKVProvider(resourceProvider);

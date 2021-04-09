@@ -73,6 +73,11 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>lt.tokenmill.crawling</groupId>
+            <artifactId>cache</artifactId>
+            <version>0.3.4-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
