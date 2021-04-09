@@ -76,7 +76,7 @@
         <dependency>
             <groupId>lt.tokenmill.crawling</groupId>
             <artifactId>cache</artifactId>
-            <version>0.3.4-SNAPSHOT</version>
+            <version>0.3.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
