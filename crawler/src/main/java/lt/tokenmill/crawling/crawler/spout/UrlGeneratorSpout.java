@@ -144,6 +144,7 @@ public class UrlGeneratorSpout extends BaseRichSpout {
         if (configuration == null || HttpSourceConfiguration.needsReload()) {
             LOG.info("Loading HTTP sources");
             List<HttpSource> sources = esSourceOperations.findEnabledSources();
+            LOG.info("Have {} enabled sources", sources.size());
             configuration = HttpSourceConfiguration.reload(configuration, sources);
             return configuration;
         }

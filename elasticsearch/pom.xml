@@ -11,7 +11,6 @@
 
     <artifactId>elasticsearch</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>lt.tokenmill.crawling</groupId>
@@ -34,26 +33,6 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>${elasticsearch.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpasyncclient</artifactId>
-            <version>4.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore-nio</artifactId>
-            <version>4.4.14</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.14</version>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch.plugin</groupId>
@@ -89,6 +68,12 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.14</version>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -114,5 +99,6 @@
             </build>
         </profile>
     </profiles>
+
 
 </project>

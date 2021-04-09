@@ -63,7 +63,6 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .fetchSource(true)
                     .explain(false);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
@@ -74,23 +73,30 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .map(this::mapToHttpSource)
                     .collect(Collectors.toList());
         } catch (ElasticsearchStatusException e) {
+            LOG.error("Failed while searching for enabled sources", e);
         } catch (Exception e) {
             e.printStackTrace();
+            LOG.error("Failed while searching for enabled sources", e);
         }
         return Collections.emptyList();
     }
 
     public HttpSource get(String url) {
         try {
-            GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
+            GetRequest getRequest = new GetRequest(getIndex(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
             GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
                 return mapToHttpSource(response.getSource());
             }
+            else {
+                LOG.error("No response for HTTP Source url: {}", url);
+            }
         } catch (ElasticsearchStatusException e) {
+            LOG.error("Failed to fetch HTTP Source for {}", url, e);
         } catch (Exception e) {
             e.printStackTrace();
+            LOG.error("Failed to fetch HTTP Source for {}", url, e);
         }
         return null;
     }
@@ -123,7 +129,6 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .explain(false);
 
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
 
@@ -158,7 +163,6 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .query(filter);
 
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .scroll(keepAlive)
                     .source(searchSourceBuilder);
 
@@ -212,7 +216,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .field("date_formats", Utils.listToText(source.getDateFormats()))
                     .field("updated", new Date())
                     .endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(url))
+            IndexRequest indexRequest = new IndexRequest(getIndex(), formatId(url))
                     .source(xContentBuilder)
                     .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             getConnection().getRestHighLevelClient().index(indexRequest, getRequestOptions());
@@ -225,7 +229,7 @@ public class EsHttpSourceOperations extends BaseElasticOps {
     public void delete(String url) {
         if (url != null) {
             try {
-                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url))
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), formatId(url))
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
                 getConnection().getRestHighLevelClient().delete(deleteRequest, getRequestOptions());
             } catch (IOException e) {
@@ -243,7 +247,6 @@ public class EsHttpSourceOperations extends BaseElasticOps {
                     .fetchSource(true)
                     .explain(false);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .scroll(keepAlive)
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
