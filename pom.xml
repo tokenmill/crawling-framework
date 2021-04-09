@@ -150,6 +150,7 @@
         <module>administration-ui</module>
         <module>analysis-ui</module>
         <module>ui-commons</module>
+        <module>cache</module>
     </modules>
 
     <dependencyManagement>
