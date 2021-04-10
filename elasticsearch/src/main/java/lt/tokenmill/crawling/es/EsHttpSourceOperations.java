@@ -83,14 +83,14 @@ public class EsHttpSourceOperations extends BaseElasticOps {
 
     public HttpSource get(String url) {
         try {
-            GetRequest getRequest = new GetRequest(getIndex(), formatId(url))
-                    .fetchSourceContext(new FetchSourceContext(true));
+            GetRequest getRequest = new GetRequest(getIndex(), /*formatId(url)*/url)
+                    .fetchSourceContext(FetchSourceContext.FETCH_SOURCE);
             GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
                 return mapToHttpSource(response.getSource());
             }
             else {
-                LOG.error("No response for HTTP Source url: {}", url);
+                LOG.error("No response for HTTP Source id: '{}'", response.getId());
             }
         } catch (ElasticsearchStatusException e) {
             LOG.error("Failed to fetch HTTP Source for {}", url, e);
