@@ -44,6 +44,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
             String filtered = filters.filter(url);
             if (isSeed || (filtered == null && status.equals(Status.DISCOVERED))) {
                 LOG.debug("Url '{}' is seed or rejected by filters", url);
+                esUrlsOperations.upsertUrlStatus(url, null, source, false, Status.FETCH_ERROR);
                 return;
             }
 
