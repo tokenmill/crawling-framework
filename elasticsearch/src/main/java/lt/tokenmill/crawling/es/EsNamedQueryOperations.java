@@ -63,7 +63,6 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .size(100)
                     .query(filter);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .source(searchSourceBuilder);
 
             SearchResponse response = getConnection().getRestHighLevelClient()
@@ -91,7 +90,6 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .fetchSource(true)
                     .suggest(new SuggestBuilder().addSuggestion("suggestion", suggestionBuilder));
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .source(sourceRequestBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
                     .search(searchRequest, getRequestOptions());
@@ -111,7 +109,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
     public NamedQuery get(String name) {
         try {
             GetResponse response = getConnection().getRestHighLevelClient()
-                    .get(new GetRequest(getIndex(), getType(), formatId(name))
+                    .get(new GetRequest(getIndex(), formatId(name))
                             .fetchSourceContext(new FetchSourceContext(true)), getRequestOptions());
             if (response.isExists()) {
                 return mapToNamedQuery(response.getSource());
@@ -126,7 +124,6 @@ public class EsNamedQueryOperations extends BaseElasticOps {
         try {
             TimeValue keepAlive = TimeValue.timeValueMinutes(10);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .scroll(keepAlive)
                     .source(new SearchSourceBuilder().query(QueryBuilders.matchAllQuery()));
             SearchResponse response = getConnection().getRestHighLevelClient()
@@ -164,7 +161,8 @@ public class EsNamedQueryOperations extends BaseElasticOps {
                     .field("advanced", nq.getAdvanced())
                     .field("updated", new Date())
                     .endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(nq.getName()))
+            IndexRequest indexRequest = new IndexRequest(getIndex())
+                    .id(formatId(nq.getName()))
                     .source(contentBuilder)
                     .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             getConnection().getRestHighLevelClient().index(indexRequest, getRequestOptions());
@@ -177,7 +175,7 @@ public class EsNamedQueryOperations extends BaseElasticOps {
     public void delete(NamedQuery nq) {
         if (nq != null && nq.getName() != null) {
             try {
-                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(nq.getName()))
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), formatId(nq.getName()))
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
                 getConnection().getRestHighLevelClient().delete(deleteRequest, getRequestOptions());
             } catch (IOException e) {
@@ -191,7 +189,6 @@ public class EsNamedQueryOperations extends BaseElasticOps {
             TimeValue keepAlive = TimeValue.timeValueMinutes(10);
             SearchRequest searchRequest = new SearchRequest(getIndex())
                     .scroll(keepAlive)
-                    .types(getType())
                     .source(new SearchSourceBuilder()
                             .size(100)
                             .explain(false)

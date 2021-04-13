@@ -57,7 +57,8 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                     .field("published", published)
                     .field("status", status)
                     .endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), id)
+            IndexRequest indexRequest = new IndexRequest(getIndex())
+                    .id(id)
                     .source(insert)
                     .create(create);
 
@@ -70,7 +71,7 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                         .field("published", published)
                         .field("status", status)
                         .endObject();
-                UpdateRequest upsert = new UpdateRequest(getIndex(), getType(), id)
+                UpdateRequest upsert = new UpdateRequest(getIndex(), id)
                         .doc(update)
                         .upsert(indexRequest);
                 getConnection().getProcessor().add(upsert);
@@ -97,7 +98,6 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                     .query(filter)
                     .sort("created", SortOrder.DESC);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
 
@@ -138,7 +138,6 @@ public class EsHttpUrlOperations extends BaseElasticOps{
                             .format("yyyy-MM-dd")
                             .dateHistogramInterval(DateHistogramInterval.DAY));
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());

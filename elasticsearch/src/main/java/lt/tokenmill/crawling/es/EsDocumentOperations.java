@@ -90,7 +90,6 @@ public class EsDocumentOperations extends BaseElasticOps {
                     .sort(PUBLISHED_FIELD, SortOrder.DESC)
                     .size(100).query(query);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
                     .search(searchRequest, getRequestOptions());
@@ -148,7 +147,6 @@ public class EsDocumentOperations extends BaseElasticOps {
                             .field("text.stem_ci"))
                     .sort(PUBLISHED_FIELD, SortOrder.DESC);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .source(sourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient()
                     .search(searchRequest, getRequestOptions());
@@ -193,7 +191,8 @@ public class EsDocumentOperations extends BaseElasticOps {
             jsonBuilder.startObject();
             applyFields(jsonBuilder, article, fields);
             jsonBuilder.endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(article.getUrl()))
+            IndexRequest indexRequest = new IndexRequest(getIndex())
+                    .id(formatId(article.getUrl()))
                     .source(jsonBuilder);
             getConnection().getProcessor().add(indexRequest);
         } catch (IOException e) {
@@ -216,7 +215,7 @@ public class EsDocumentOperations extends BaseElasticOps {
             XContentBuilder upsertDoc = jsonBuilder().startObject();
             applyFields(upsertDoc, article, fields);
             upsertDoc.endObject();
-            UpdateRequest upsert = new UpdateRequest(getIndex(), getType(), id)
+            UpdateRequest upsert = new UpdateRequest(getIndex(), id)
                     .doc(update)
                     .upsert(upsertDoc);
             getConnection().getProcessor().add(upsert);
@@ -231,7 +230,7 @@ public class EsDocumentOperations extends BaseElasticOps {
 
     public Map<String, Object> getAsMap(String url) {
         try {
-            GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
+            GetRequest getRequest = new GetRequest(getIndex(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
             GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
@@ -268,7 +267,6 @@ public class EsDocumentOperations extends BaseElasticOps {
                 .fetchSource(true);
 
         SearchRequest searchRequest = new SearchRequest(getIndex())
-                .types(getType())
                 .searchType(SearchType.DEFAULT)
                 .source(searchSourceBuilder);
         try {
@@ -294,7 +292,6 @@ public class EsDocumentOperations extends BaseElasticOps {
                     .must(QueryBuilders.termQuery(SOURCE_FIELD, sourceUrl));
 
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .searchType(SearchType.DEFAULT)
                     .source(new SearchSourceBuilder()
                             .query(filter)
