@@ -89,7 +89,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
 
     public HttpSourceTest get(String url) {
         try {
-            GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
+            GetRequest getRequest = new GetRequest(getIndex(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
             GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
