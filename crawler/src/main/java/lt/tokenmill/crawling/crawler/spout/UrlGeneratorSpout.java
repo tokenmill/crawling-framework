@@ -5,11 +5,14 @@ import com.digitalpebble.stormcrawler.persistence.Status;
 import lt.tokenmill.crawling.crawler.CrawlerConstants;
 import lt.tokenmill.crawling.crawler.ServiceProvider;
 import lt.tokenmill.crawling.crawler.utils.PrioritizedSource;
+import lt.tokenmill.crawling.crawler.utils.UrlFiltersCache;
 import lt.tokenmill.crawling.data.DataUtils;
 import lt.tokenmill.crawling.data.HttpSource;
 import lt.tokenmill.crawling.data.HttpUrl;
 import lt.tokenmill.crawling.es.EsHttpSourceOperations;
+import lt.tokenmill.crawling.es.EsHttpSourcesCache;
 import lt.tokenmill.crawling.es.EsHttpUrlOperations;
+import lt.tokenmill.crawling.parser.urls.UrlFilters;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -144,6 +147,7 @@ public class UrlGeneratorSpout extends BaseRichSpout {
         if (configuration == null || HttpSourceConfiguration.needsReload()) {
             LOG.info("Loading HTTP sources");
             List<HttpSource> sources = esSourceOperations.findEnabledSources();
+            LOG.info("Have {} enabled sources", sources.size());
             configuration = HttpSourceConfiguration.reload(configuration, sources);
             return configuration;
         }

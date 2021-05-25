@@ -31,10 +31,6 @@ public class BaseElasticOps {
         return index;
     }
 
-    protected String getType() {
-        return type;
-    }
-
     protected RequestOptions getRequestOptions() { return requestOptions; }
 
     public void close() {

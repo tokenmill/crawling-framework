@@ -72,7 +72,6 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                     .query(filter);
 
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .source(searchSourceBuilder);
             SearchResponse response = getConnection().getRestHighLevelClient().search(searchRequest, getRequestOptions());
             List<HttpSourceTest> items = Arrays.stream(response.getHits().getHits())
@@ -90,7 +89,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
 
     public HttpSourceTest get(String url) {
         try {
-            GetRequest getRequest = new GetRequest(getIndex(), getType(), formatId(url))
+            GetRequest getRequest = new GetRequest(getIndex(), formatId(url))
                     .fetchSourceContext(new FetchSourceContext(true));
             GetResponse response = getConnection().getRestHighLevelClient().get(getRequest, getRequestOptions());
             if (response.isExists()) {
@@ -115,7 +114,6 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                     .query(filter)
                     .size(100);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .source(searchSourceBuilder)
                     .scroll(keepAlive);
 
@@ -155,7 +153,8 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
                     .field("date", hst.getDate() != null ? hst.getDate().trim() : null)
                     .field("updated", new Date())
                     .endObject();
-            IndexRequest indexRequest = new IndexRequest(getIndex(), getType(), formatId(hst.getUrl()))
+            IndexRequest indexRequest = new IndexRequest(getIndex())
+                    .id(formatId(hst.getUrl()))
                     .source(contentBuilder)
                     .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             getConnection().getRestHighLevelClient().index(indexRequest, getRequestOptions());
@@ -168,7 +167,7 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
     public void delete(String url) {
         if (url != null) {
             try {
-                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), formatId(url))
+                DeleteRequest deleteRequest = new DeleteRequest(getIndex(), formatId(url))
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
                 DeleteResponse delete = getConnection().getRestHighLevelClient().delete(deleteRequest, getRequestOptions());
                 LOG.debug("Delete HttpSourceTest url {} with response status {}", url, delete.status());
@@ -182,7 +181,6 @@ public class EsHttpSourceTestOperations extends BaseElasticOps {
         try {
             TimeValue keepAlive = TimeValue.timeValueMinutes(10);
             SearchRequest searchRequest = new SearchRequest(getIndex())
-                    .types(getType())
                     .scroll(keepAlive)
                     .source(new SearchSourceBuilder()
                             .size(100)
