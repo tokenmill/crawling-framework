@@ -136,7 +136,7 @@
         <guava.version>19.0</guava.version>
         <joda-time.version>2.9.4</joda-time.version>
         <slf4j.version>1.7.12</slf4j.version>
-        <jsoup.version>1.10.3</jsoup.version>
+        <jsoup.version>1.15.3</jsoup.version>
         <jsonld.version>0.11.0</jsonld.version>
         <timewords.version>0.5.0</timewords.version>
     </properties>
